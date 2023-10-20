@@ -1,0 +1,83 @@
+@model AMS.Models.QuanLyMenuTypeViewModel.QuanLyMenuTypeCRUDViewModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<div id="AppQuanLyMenuType" class="view-add-edit">
+    <div class="row">
+        <div class="col-md-12">
+            <form id="frmQuanLyMenuType">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="CreatedDate" />
+                <input type="hidden" asp-for="CreatedBy" />
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label asp-for="TenMenuType" class="control-label"></label>
+                            <input asp-for="TenMenuType" class="form-control" />
+                            <span asp-validation-for="TenMenuType" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="MoTa" class="control-label"></label>
+                            <input asp-for="MoTa" class="form-control" />
+                            <span asp-validation-for="MoTa" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="LaMenuFrontend" class="control-label"></label>
+                            <input asp-for="LaMenuFrontend" class="form-control" />
+                            <span asp-validation-for="LaMenuFrontend" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <input type="button" id="btnSave" value="Lưu" onclick="Save()" class="btn btn-info">
+                    <button type="button" id="btnClose" class="btn btn-danger" data-dismiss="modal">Đóng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
+<script type="text/javascript">
+    AppQuanLyMenuType = new Vue({
+        el: '#AppQuanLyMenuType',
+        mounted() {
+            this.init();
+        },
+        data: {
+            images: new Map(),
+            previewImageThumb: "/images/DefaultAsset/image_thumb.png",
+            previewImage: null
+        },
+        computed: {
+
+
+
+
+        },
+        methods: {
+            fileSelected(evt, previewImage) {
+                evt.preventDefault()
+                const reader = new FileReader();
+                reader.readAsDataURL(evt.target.files[0]);
+                reader.onload = e => {
+                    document.getElementById(previewImage).style.backgroundImage = `url('${e.target.result}')`;
+                };
+                this.images.set(previewImage, evt.target.files[0]);
+            },
+            demo_func: function () {
+
+            },
+            init: function () {
+
+            }
+
+
+
+        }
+    });
+
+
+</script>

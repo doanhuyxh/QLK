@@ -1,0 +1,292 @@
+@model AMS.Models.QuanLyNhomNguoiDungViewModel.QuanLyNhomNguoiDungCRUDViewModel
+
+@{
+    ViewData["Title"] = "Create";
+    var sectionName = " ";
+}
+<link rel="stylesheet" href="~/css/views/QuanLyNhomNguoiDung/EditQuanLyNhomNguoiDung.css" />
+<style>
+    .permission-list {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .permission-section {
+        margin-right: 20px;
+    }
+
+    .permission-subsection {
+        margin-top: 10px;
+    }
+
+    .permission-items {
+        list-style-type: none;
+        margin-left: 0;
+        padding-left: 0;
+    }
+
+    .permission-item {
+        display: inline-block;
+        margin-right: 10px;
+    }
+
+    .permission-checkbox {
+        margin-left: 5px;
+    }
+
+    label.control-label {
+        display: inline-block;
+        width: 200px;
+    }
+
+</style>
+<div id="AppQuanLyNhomNguoiDung" class="view-add-edit view-edit-QuanLyNhomNguoiDung">
+    <div class="row">
+        <div class="col-md-12">
+            <form id="frmQuanLyNhomNguoiDung">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="CreatedDate" />
+                <input type="hidden" asp-for="CreatedBy" />
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label asp-for="TenNhom" class="control-label"></label>
+                            <input asp-for="TenNhom" class="form-control" />
+                            <span asp-validation-for="TenNhom" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="MoTa" class="control-label"></label>
+                            <input  asp-for="MoTa" class="form-control" />
+                            <span asp-validation-for="MoTa" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="permission-list">
+                            @for (int i = 0; i < Model.ViewSectionAccessList.Count(); i++)
+                            {
+                                <div class="permission-section">
+                                    <ul>
+                                        @for (int j = 0; j < @Model.ViewSectionAccessList[i].Value.Count(); j++)
+                                        {
+                                            <li class="permission-subsection">
+
+                                                @if (Model.ViewSectionAccessList[i].Value[j].Key == "KeHoachSanXuat")
+                                                {
+                                                    sectionName = "Kế hoạch sản xuất";//1
+                                                }
+                                                else if (Model.ViewSectionAccessList[i].Value[j].Key == "aXemTrangDashboad")
+                                                {
+                                                    sectionName = "Xem trang chủ";//2
+                                                }
+                                                else if (Model.ViewSectionAccessList[i].Value[j].Key == "KhachHang")
+                                                {
+                                                    sectionName = "Khách hàng";//3
+                                                }
+                                                else if (Model.ViewSectionAccessList[i].Value[j].Key == "KiemKho")
+                                                {
+                                                    sectionName = "Kiểm Kho";//4
+                                                }
+                                                else if (Model.ViewSectionAccessList[i].Value[j].Key == "NhapKho")
+                                                {
+                                                    sectionName = "Nhập kho";//5
+                                                }
+                                                else if (Model.ViewSectionAccessList[i].Value[j].Key == "NhapKhoLyThuyet")
+                                                {
+                                                    sectionName = "Phiếu mua hàng";//6
+                                                }else if (Model.ViewSectionAccessList[i].Value[j].Key == "NhapKhoLyThuyet2")
+                                                {
+                                                    sectionName = "Nhập kho lý thuyết";//6
+                                                }
+                                                else if (Model.ViewSectionAccessList[i].Value[j].Key == "NhomKhachHang")
+                                                {
+                                                    sectionName = "Nhóm khách hàng";//7
+                                                }
+                                                else if (Model.ViewSectionAccessList[i].Value[j].Key == "PhieuXuatThanhPham")
+                                                {
+                                                    sectionName = "Phiếu xuất thành phẩm";//7
+                                                }
+                                                else if (Model.ViewSectionAccessList[i].Value[j].Key == "XuatThanhPham")
+                                                {
+                                                    sectionName = "Xuất thành phẩm";//7
+                                                }
+                                                else if (Model.ViewSectionAccessList[i].Value[j].Key == "PhieuNhapThanhPham")
+                                                {
+                                                    sectionName = "Phiếu nhập thành phẩm";//7
+                                                }
+                                                else if (Model.ViewSectionAccessList[i].Value[j].Key == "NhapThanhPham")
+                                                {
+                                                    sectionName = "Nhập thành phẩm";//7
+                                                }
+                                                else if (Model.ViewSectionAccessList[i].Value[j].Key == "QuanLyNhomNguoiDung")
+                                                {
+                                                    sectionName = "Quản lý nhóm người dùng";//8
+                                                }
+                                                else if (Model.ViewSectionAccessList[i].Value[j].Key == "QuanLyThanhPham")
+                                                {
+                                                    sectionName = "Quản lý thành phẩm";//8
+                                                }
+                                                else if (Model.ViewSectionAccessList[i].Value[j].Key == "UserManagement")
+                                                {
+                                                    sectionName = "Quản lý người dùng";//9
+                                                }
+                                                else if (Model.ViewSectionAccessList[i].Value[j].Key == "XayDungCongThuc")
+                                                {
+                                                    sectionName = "Xây dựng công thức";//10
+                                                }
+                                                else if (Model.ViewSectionAccessList[i].Value[j].Key == "XuatKho")
+                                                {
+                                                    sectionName = "Xuất kho";//11
+                                                }
+                                                else if (Model.ViewSectionAccessList[i].Value[j].Key == "TheoDoiChatLuong")
+                                                {
+                                                    sectionName = "Theo dõi chất lượng";//12
+                                                }
+                                                else if (Model.ViewSectionAccessList[i].Value[j].Key == "NguyenLieu")
+                                                {
+                                                    sectionName = "Nguyên liệu";//13
+                                                }
+                                                else if (Model.ViewSectionAccessList[i].Value[j].Key == "ThongBaoChenhLechNguyenLieu")
+                                                {
+                                                    sectionName = "Cảnh báo";//13
+                                                }
+
+                                                @sectionName
+
+                                                <ul class="permission-items">
+                                                    @for (int k = 0; k < @Model.ViewSectionAccessList[i].Value[j].Value.Count(); k++)
+                                                    {
+                                                        <li class="permission-item">
+                                                            <label class="control-label">
+                                                                @Model.ViewSectionAccessList[i].Value[j].Value[k].Value.Title
+                                                                <input name="permistions[@Model.ViewSectionAccessList[i].Key][@Model.ViewSectionAccessList[i].Value[j].Key][@Model.ViewSectionAccessList[i].Value[j].Value[k].Value.Name]" checked="@Model.ViewSectionAccessList[i].Value[j].Value[k].Value.CurrentValue" type="checkbox" class="form-control permission-checkbox" />
+                                                            </label>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                        </div>
+
+                    </div>
+                </div>
+                <div class="form-group">
+                    <input type="button" id="btnSave" value="Lưu" v-on:click="Save" class="btn btn-info">
+                    <button type="button" id="btnClose" class="btn btn-danger" data-dismiss="modal">Đóng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
+<script type="text/javascript">
+    AppQuanLyNhomNguoiDung = new Vue({
+        el: '#AppQuanLyNhomNguoiDung',
+        mounted() {
+            this.init();
+        },
+        data: {
+            Id: @Html.Raw(@Model.Id),
+            TenNhom: "@Html.Raw(@Model.TenNhom)",
+            MoTa: "@Html.Raw(@Model.MoTa)",
+            images: new Map(),
+            ViewSectionAccessList: @Html.Raw(ViewBag.JsonViewSectionAccessList),
+            previewImageThumb: "/images/DefaultAsset/image_thumb.png",
+            previewImage: null
+        },
+        computed: {
+
+
+
+
+        },
+        methods: {
+            fileSelected(evt, previewImage) {
+                evt.preventDefault()
+                const reader = new FileReader();
+                reader.readAsDataURL(evt.target.files[0]);
+                reader.onload = e => {
+                    document.getElementById(previewImage).style.backgroundImage = `url('${e.target.result}')`;
+                };
+                this.images.set(previewImage, evt.target.files[0]);
+            },
+            demo_func: function () {
+
+            },
+            init: function () {
+
+            },
+            makeid: function (length) {
+                let result = '';
+                const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                const charactersLength = characters.length;
+                let counter = 0;
+                while (counter < length) {
+                    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+                    counter += 1;
+                }
+                return result;
+            },
+
+            Save:function(){
+                var _FormData = new FormData()
+                console.log("ViewSectionAccessList",this.ViewSectionAccessList);
+                for (var i = 0; i < this.ViewSectionAccessList.length;i++){
+                    var view = this.ViewSectionAccessList[i].Key;
+                    for (var j = 0; j < this.ViewSectionAccessList[i].Value.length; j++) {
+                        var section = this.ViewSectionAccessList[i].Value[j].Key;
+                        for (var k = 0; k < this.ViewSectionAccessList[i].Value[j].Value.length; k++) {
+                            var action = this.ViewSectionAccessList[i].Value[j].Value[k].Value.Name;
+                            this.ViewSectionAccessList[i].Value[j].Value[k].Value.CurrentValue = $(`input[name="permistions[${view}][${section}][${action}]"]`).is(':checked');
+                        }
+                    }
+                }
+                console.log("ViewSectionAccessList", this.ViewSectionAccessList);
+                _FormData.append('Id', $("#Id").val())
+                _FormData.append('CreatedBy', $("#CreatedBy").val())
+                _FormData.append('CreatedDate', $("#CreatedDate").val())
+                _FormData.append('TenNhom', $("#TenNhom").val());
+                _FormData.append('Permistions', JSON.stringify(this.ViewSectionAccessList));
+                _FormData.append('NgayThem', $("#NgayThem").val());
+                _FormData.append('MoTa', $("#MoTa").val())
+                if (!$("#frmQuanLyNhomNguoiDung").valid()) {
+                    return;
+                }
+
+                $("#btnSave").val("Please Wait");
+                $('#btnSave').attr('disabled', 'disabled');
+                $.ajax({
+                    type: "POST",
+                    url: "/QuanLyNhomNguoiDung/AddEdit",
+                    data: _FormData,
+                    processData: false,
+                    contentType: false,
+                    success: function (result) {
+                        Swal.fire({
+                            title: result,
+                            icon: "success"
+                        }).then(function () {
+                            document.getElementById("btnClose").click();
+                            $("#btnSave").val("Save");
+                            $('#btnSave').removeAttr('disabled');
+                            $('#tblQuanLyNhomNguoiDung').DataTable().ajax.reload();
+                        });
+                    },
+                    error: function (errormessage) {
+                        SwalSimpleAlert(errormessage.responseText, "warning");
+                        $("#btnSave").val("Save");
+                        $('#btnSave').removeAttr('disabled');
+                    }
+                });
+            }
+
+
+
+
+        }
+    });
+
+
+</script>

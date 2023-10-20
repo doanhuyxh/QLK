@@ -1,0 +1,82 @@
+﻿@model AMS.Models.DashboardViewModel.SharedUIDataViewModel
+<div class="menu-container">
+    <div class="menu">
+        <ul>
+            <li><a href="#"><i class="site-menu-icon fa fa-info" aria-hidden="true"></i> Giới thiệu</a></li>
+            <li>
+                <a href="/"><i class="site-menu-icon fa fa-sitemap" aria-hidden="true"></i> Tổng hợp</a>
+                
+            </li>
+            <li>
+                <a href=""><i class="site-menu-icon fa fa-retweet" aria-hidden="true"></i> Cho mượn tài liệu</a>
+                <ul>
+                    <li><a href="@MainMenu.ChoMuonTaiLieu.PathIndex">Lập phiếu cho mượn</a></li>
+                    <li><a href="@MainMenu.ChoMuonTaiLieu.PathDuyetPhieu">Duyệt phiếu cho mượn</a></li>
+                    <li><a href="@MainMenu.ChoMuonTaiLieu.PathDuyetThuHoi">Thu hồi tài liệu</a></li>
+                </ul>
+            </li>
+            <li>
+                <a class="" href="javascript:void(0)"><i class="site-menu-icon fa fa-cogs" aria-hidden="true"></i> Danh mục</a>
+                <ul>
+                    <li>
+                        <a href="javascript:void(0)" class="title">Thuộc tính</a>
+                        <ul>
+                            <li><a href="@MainMenu.TrustAssetLevel.Path">Độ tin cậy</a></li>
+                            <li><a href="@MainMenu.SecurityAssetsLevel.Path">Độ bảo mật</a></li>
+                            <li><a href="@MainMenu.CheDoSuDung.Path">Chế độ sử dụng</a></li>
+                            <li><a href="@MainMenu.LoaiHinhTaiLieu.Path">Loại hình tài liệu</a></li>
+                            <li><a href="@MainMenu.LoaiHinhVanBan.Path">Loại hình văn bản</a></li>
+                            <li><a href="@MainMenu.DocumentLanguage.Path">Ngôn ngữ văn bản</a></li>
+                            <li><a href="@MainMenu.DocumentLifeTimeProductect.Path">Thời hạn bảo quản</a></li>
+                            <li><a href="@MainMenu.DocumentPhysicalState.Path">Tình trạng vật lý</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#" class="title">Thông tin lưu trữ</a>
+                        <ul>
+                            <li><a href="@MainMenu.CoQuanLuutru.Path">Cơ quan lưu trữ</a></li>
+                            <li><a href="@MainMenu.KhoLuuTru.Path">Kho lưu trữ</a></li>
+                            <li><a href="@MainMenu.KeGiaLuuTru.Path">Kệ/Giá lưu trữ</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#" class="title">Thông tin hồ sơ</a>
+                        <ul>
+                            <li><a href="@MainMenu.AssetCategories.Path">Phông lưu trữ</a></li>
+                            <li><a href="@MainMenu.AssetSubCategories.Path">Hộp hồ sơ</a></li>
+                            <li><a href="@MainMenu.KhoaNhiemKy.Path">Khoá nhiệm kỳ</a></li>
+                        </ul>
+                    </li>
+
+                </ul>
+            </li>
+            <li><a href="@MainMenu.AssetChildSubCategories.Path"><i class="site-menu-icon fa fa-folder-o" aria-hidden="true"></i> Hồ sơ</a></li>
+            <li><a href="@MainMenu.Asset.Path"><i class="site-menu-icon fa fa-file-text-o" aria-hidden="true"></i> Văn bản</a></li>
+            <li>
+                <a href="javascript:void(0)"><i class="site-menu-icon fa fa-user-o" aria-hidden="true"></i> Hệ thống</a>
+                <ul>
+                    <li><a href="@MainMenu.NhomNguoiDung.Path">Nhóm người dùng</a></li>
+                    <li><a href="@MainMenu.UserManagement.Path">Người dùng</a></li>
+                    <li><a href="@MainMenu.ManagePageAccess.Path">Phân quyền người dùng</a></li>
+                    <li><a href="#">Điều hướng người dùng</a></li>
+                    <li><a href="#">Thông báo hệ thống</a></li>
+                    <li><a href="@MainMenu.CompanyInfo.Path">Cài đặt hệ thống</a></li>
+                </ul>
+            </li>
+            <li><a href="#"><i class="site-menu-icon fa fa-search" aria-hidden="true"></i> Tra cứu khai thác</a></li>
+            <li>
+                <a href="#"><i class="site-menu-icon fa fa-line-chart" aria-hidden="true"></i> Báo cáo</a>
+                <ul>
+                    <li><a href="#">Mục lục văn bản</a></li>
+                    <li><a href="#">Mục lục hồ sơ</a></li>
+                    <li><a href="#">Báo cáo phông lưu trữ</a></li>
+                    <li><a href="#">Báo cáo cơ quan lưu trữ</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<script type="text/javascript">
+    
+</script>

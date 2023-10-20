@@ -1,0 +1,50 @@
+﻿@using Microsoft.Extensions.Options;
+@inject IOptions<AMS.Models.CommonViewModel.ApplicationInfo> _ApplicationInfo;
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="icon" href="~/images/favicon.ico" type="image/gif" sizes="16x16">
+
+    <title>@ViewData["Title"]</title>
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+
+    <link rel="stylesheet" href="~/AdminLTE/plugins/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="~/AdminLTE/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
+    <link rel="stylesheet" href="~/AdminLTE/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="~/css/custom.css">
+    <link href="~/lib/toastr/toastr.min.css" rel="stylesheet" />
+    <link href="~/lib/library/source_sans_pro_300_400_400i_700.css" rel="stylesheet" />
+
+</head>
+<body class="hold-transition login-page">
+    <div class="login-box">
+        <div class="card">
+            <div class="card-body login-card-body">
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+
+    <div class="text-right">
+        <span style="color:white">@_ApplicationInfo.Value.Version</span>
+    </div>
+
+
+    <script src="~/AdminLTE/plugins/jquery/jquery.min.js"></script>
+    <script src="~/AdminLTE/dist/js/adminlte.js"></script>
+    <script src="~/AdminLTE/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/toastr/toastr.min.js"></script>
+    <script src="~/lib/loadingoverlay.js"></script>
+    <script src="~/lib/ua-parser.min.js"></script>
+    <script src="~/lib/jquery.preloader.js"></script>
+    @RenderSection("Scripts", required: false)
+
+</body>
+</html>

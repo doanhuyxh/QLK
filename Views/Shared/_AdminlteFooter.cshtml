@@ -1,0 +1,15 @@
+﻿@using Microsoft.Extensions.Options;
+@inject IOptions<AMS.Models.CommonViewModel.ApplicationInfo> _ApplicationInfo;
+
+
+<aside class="control-sidebar control-sidebar-dark">
+    <!-- Control sidebar content goes here -->
+</aside>
+
+<footer class="main-footer">
+     <div class="float-right d-none d-sm-inline-block">
+        @_ApplicationInfo.Value.Version
+    </div>
+</footer>
+
+

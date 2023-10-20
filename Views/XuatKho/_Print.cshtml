@@ -1,0 +1,81 @@
+﻿@{
+    Layout = null;
+    int count = 0;
+}
+
+<!doctype html>
+<html lang="vn">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Phiếu xuất kho</title>
+    <link href="~/lib/bootstrap/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="container">
+        <div class="row mt-5">
+            <div class="col-12 text-center">
+                <h3 class="w-5">Phiếu xuất kho</h3>
+            </div>
+
+            <div class="col-12 mt-1">
+                <p class="text fs-6">- Họ tên người nhận hàng:</p>
+                <p class="text fs-6">- Địa chỉ (bộ phận):</p>
+                <p class="text fs-6">- Xuất tại kho (lô):</p>
+                <p class="text fs-6">- Địa điểm:</p>
+            </div>
+
+            <div class="col-12">
+                <table class="table table-bordered border-dark">
+                    <thead>
+                        <tr>
+                            <td>STT</td>
+                            <td>Tên nguyên/phụ liệu </td>
+                            <td>Số lượng xuất</td>
+                            <td>Đơn vị</td>
+                            <td>Chất lượng</td>             
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in ViewBag.Load)
+                        {
+                            count++;
+                            <tr>
+                                <td>@count</td>
+                                <td>@item.TenNl</td>
+                                <td>@item.SoLuong</td>
+                                <td>@item.CL</td>
+                                <td>@item.DV</td>
+                            </tr>
+                        }
+                    </tbody>             
+                </table>
+            </div>
+            
+            <div class="col-12">
+                <p class="text fs-6 w-25 float-end text-right">Ngày.....tháng....năm........</p>
+            </div>
+            <div class="col-12 row mt-3">
+                <div class="col">
+                    <h5 class="h5 text-center">Người lập phiếu</h5>
+                    <p class="text text-center">( ký, họ tên)</p>
+                </div><div class="col">
+                    <h5 class="h5 text-center">Người nhận hàng</h5>
+                    <p class="text text-center">( ký, họ tên)</p>
+                </div><div class="col">
+                    <h5 class="h5 text-center">Thủ kho</h5>
+                    <p class="text text-center">( ký, tên)</p>
+                </div><div class="col">
+                    <h5 class="h5 text-center">Kế toán trưởng</h5>
+                    <p class="text text-center">(Hoặc bộ phận có nhu cầu nhập)</p>
+                    <p class="text text-center">(ký, họ tên)</p>
+                </div>
+                <div class="col">
+                    <h5 class="h5 text-center">Giám đốc</h5>
+                    <p class="text text-center">( ký, tên)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

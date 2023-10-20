@@ -1,0 +1,901 @@
+@model AMS.Models.NhapKhoViewModel.NhapKhoCRUDViewModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+<div id="AppNhapKho" class="view-add-edit view-edit-NhapKho">
+    <div class="row">
+        <div class="col-md-12">
+            <form id="frmNhapKho">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="CreatedDate" />
+                <input type="hidden" asp-for="CreatedBy" />
+
+                <div class="form-check form-check-inline bg-secondary p-3">
+                    <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" v-on:change="PhuongThucNhap(1)" value="check">
+                    <label class="form-check-label" for="inlineRadio1">Thêm tay</label>
+                </div>
+
+                <div class="form-check form-check-inline bg-success p-3">
+                    <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" v-on:change="PhuongThucNhap(2)">
+                    <label class="form-check-label" for="inlineRadio2">Thêm bằng excel</label>
+                </div>
+
+                <div class="form-check form-check-inline bg-success p-3">
+                    <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio3" v-on:change="PhuongThucNhap(3)">
+                    <label class="form-check-label" for="inlineRadio3">Thêm từ phiếu mua hàng</label>
+                </div>
+
+                <div class="form-check form-check-inline bg-success p-3">
+                    <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio4" v-on:change="PhuongThucNhap(4)">
+                    <label class="form-check-label" for="inlineRadio4">Thêm từ phiếu nhập kho lý thuyết</label>
+                </div>
+
+                <div class="row mt-5" v-if=" IsImportExcell" id="fileEcell2">
+                    <div class="input-group col-9">
+                        <div class="custom-file">
+                            <input type="file" v-on:change="ImportExcel" class="custom-file-input" id="fileEcell">
+                            <label class="custom-file-label" for="fileEcell">Chọn file</label>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <a v-on:click="downloadFile()" class="btn btn-outline-success">Tải file mẫu</a>
+                    </div>
+                    <div class="col-12">
+                        <p class="text-center text-danger p-10 mt-5">
+                            Các trường tương ứng trong excel: Nguyên liệu = Tên Nguyên Phụ Liệu, Số lượng nhập thực tế = Số lượng thực tế, Đơn giá = GIÁ,
+                            Thành tiền = Số lượng thực tế * Đơn giá
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-12 form-group" v-if="IsNhapKhoLyThuyet">
+                    <label for="chonnhaplythuyet">Chọn mã phiếu mua hàng</label>
+                    <select class="form-control" id="chonnhaplythuyet" v-on:change="LayTuNhapKhoLyThuyet">
+                        <option value="0" disabled selected>Vui lòng chọn</option>
+                        <option v-for="ThoiGian in DanhSachLayTuNhapKhoLyThuyet" v-bind:value="ThoiGian.Id">{{ThoiGian.Name}}</option>
+                    </select>
+                </div>
+
+                <div class="col-12 form-group" v-if="IsNhapKhoLyThuyet2">
+                    <label for="chonnhaplythuyet">Chọn mã phiếu nhập kho lý thuyết</label>
+                    <select class="form-control" id="chonnhaplythuyet2" v-on:change="LayTuNhapKhoLyThuyet2">
+                        <option value="0" disabled selected>Vui lòng chọn</option>
+                        <option v-for="ThoiGian in DanhSachLayTuNhapKhoLyThuyet" v-bind:value="ThoiGian.Id">{{ThoiGian.Name}}</option>
+                    </select>
+                </div>
+
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label asp-for="NgayNhap" class="control-label"></label>
+                            <input asp-for="NgayNhap" type="date" class="form-control" />
+                            <span asp-validation-for="NgayNhap" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="DonViTienTe" class="control-label"></label>
+                            <input asp-for="DonViTienTe" class="form-control" v-model="symbol" />
+                            <span asp-validation-for="DonViTienTe" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="MoTa" class="control-label"></label>
+                            <input asp-for="MoTa" class="form-control" />
+                            <span asp-validation-for="MoTa" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="text-center col-12"><p class="text-center w-75 font-weight-bold text-danger">Danh sách nguyên liệu nhập kho</p></div>
+
+                    <table class="table table-san-pham-nhap-kho">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Mã kho</th>
+                                <th>Số lô</th>
+                                <th>Mã hải quan</th>
+                                <th>Nguyên liệu</th>
+                                <th>Tên khách hàng</th>
+                                <th>Số lượng chứng từ</th>
+                                <th>Số lượng thực nhập</th>
+                                <th>Chênh lệch</th>
+                                <th>Đơn giá</th>
+                                <th>Chất lượng</th>
+                                <th>Thành tiền</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            <tr v-for="(item,index) in backupItem" v-bind:key="index" v-bind:class="{'b-1': chuaNhapIndexes.some(i => i.nguyenLieuIndex === index)}">
+                                <input type="hidden" v-model="item.NhapKhoId" />
+                                <td>{{index+1}}</td>
+                                <td><input v-model=item.MaKho type="text" class="form-control" :readonly="IsImportExcell" /></td>
+                                <td><input v-model=item.Solo type="text" class="form-control" :readonly="IsImportExcell" /></td>
+                                <td><input v-model=item.MaHaiQuan type="text" class="form-control" :readonly="IsImportExcell" /></td>
+                                <td>
+                                    <select v-model="item.NguyenLieuId" v-bind:disabled="IsImportExcell" class="form-control" v-on:change="Custom($event, item.NguyenLieuId, index)">
+                                        <option disabled value="">Chọn nguyên liệu</option>
+                                        <option v-for="nl in DanhSachNguyenLieu" v-bind:key="nl.Id" v-bind:value="nl.Id">{{ nl.Name }}</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input v-model="item.NhaCungCap" :readonly="IsImportExcell" type="text" class="form-control" />
+                                </td>
+                                <td>
+                                    <input v-model="item.SoLuongNhapTrenChungTu" :readonly="IsImportExcell" type="number" class="form-control" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+                                </td>
+                                <td>
+                                    <input v-model="item.SoLuongNhap" type="number" class="form-control" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+                                </td>
+                                <td>
+                                    <input :value="Math.abs(parseInt(item.SoLuongNhap) - parseInt(item.SoLuongNhapTrenChungTu))" readonly class="form-control" />
+                                    <div class="alert alert-danger" v-if="Math.abs(parseInt(item.SoLuongNhap) - parseInt(item.SoLuongNhapTrenChungTu)) > 0">
+                                        <span>Có sự chênh lệch</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <input v-model="item.DonGia" :readonly="IsImportExcell" type="number" :value="formatTienTe(item.DonGia)" class="form-control" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+                                </td>
+                                <td>
+                                    <select v-model="item.ChatLuong" class="form-control">
+                                        <option disabled value="">Chọn đánh giá</option>
+                                        <option value="1">Tốt</option>
+                                        <option value="2">Khá</option>
+                                        <option value="3">Đạt</option>
+                                        <option value="4">Không đạt</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input readonly :value="formatTienTe(item.SoLuongNhap * item.DonGia)" type="text" class="form-control" />
+                                </td>
+                                <td>
+                                    <button class="btn btn-secondary m-1" type="button" v-on:click="Custom($event,item.NguyenLieuId, index)">Chi Tiết</button>
+                                    <button class="btn btn-warning m-1" type="button" v-if="!IsImportExcell" v-on:click="Xoa(index)">Xoá</button>
+                                </td>
+                            </tr>
+
+
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="12"></td>
+                                <td><button type="button" class="btn btn-primary" v-if="!IsImportExcell" v-on:click="ThemMoi()">Thêm</button></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div class="form-group">
+                    <input type="button" id="btnSave" value="Lưu" onclick="Save()" class="btn btn-info">
+                    <button type="button" id="btnClose" class="btn btn-danger" data-dismiss="modal">Đóng</button>
+                </div>
+            </form>
+
+        </div>
+
+    </div>
+    <div class="modal" id="myModal2" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="title_nguyenLieu"></h4>
+                    <p class="text-green">Số lượng: {{curentSoLuong}}</p>
+                </div><div class="container"></div>
+                <div class="modal-body">
+                    <table class="table table-responstive">
+                        <thead>
+                            <tr>
+                                <th v-for="(item, index) in customfile">
+                                    <p>{{item.FieldName}}</p>
+                                </th>
+                                <th>Số lượng</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(itemss,index) in backupItem2" :key="index">
+                                <td>
+                                    <select v-model="itemss.ListCustom[0]" class="form-control">
+                                        <option v-for="nl in MaMau" v-bind:key="nl.ID" v-bind:value="nl.ID">{{ nl.CustomFieldValue }}</option>
+                                    </select>
+                                </td>
+
+                                <td>
+                                    <select v-model="itemss.ListCustom[1]" class="form-control">
+                                        <option v-for="nl in Size" v-bind:key="nl.ID" v-bind:value="nl.ID">{{ nl.CustomFieldValue }}</option>
+                                    </select>
+                                </td>
+
+                                <td>
+                                    <input type="text" v-model="itemss.QuantityProduct" v-bind:class="{'border-danger': CheckSoLuongChiTiet}" class="form-control border" />
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-danger" v-on:click="deleteList(index)">Xóa</button>
+                                </td>
+                            </tr>
+                        </tbody>
+
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" :disabled="CheckSoLuongChiTiet" v-on:click="SaveModelChild()">Lưu</button>
+                    <button type="button" class="btn btn-danger" v-on:click="closeModelChild()">Đóng</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+<script lang="javascript" src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+<script src="/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
+<script type="text/javascript">
+    AppNhapKho = new Vue({
+        el: '#AppNhapKho',
+        mounted() {
+            this.init();
+        },
+        data: {
+            images: new Map(),
+            previewImageThumb: "/images/DefaultAsset/image_thumb.png",
+            previewImage: null,
+            DanhSachNguyenLieu: [],//Lấy danh sách gồm Id, Tên nguyên liệu
+            DanhSachNguyenLieuNhap: @Html.Raw(ViewBag.LoadNguyenLieuNhapKho),// tạo 1 mảng để thêm nguyên liệu và số lượng nhập,
+            IsImportExcell: false, // trang thái import excel
+            IsNhapKhoLyThuyet: false, // trang thái lấy từ kho lý thuyết
+            IsNhapKhoLyThuyet2: false, // trang thái lấy từ kho lý thuyết 2
+            DanhSachLayTuNhapKhoLyThuyet: [],
+            NhapKhoLyThuyetId: null,
+            customfile: [],
+            custinfileValue: [],
+            TotalKey: [],
+            currentNguyenLieu: 0,
+            currentIndexDanhSachNguyenLieuNhap: 0,
+            curentSoLuong: 0,
+            MaLo: [],
+            symbol: "@Html.Raw(Model.DonViTienTe)"
+
+
+        },
+        computed: {
+
+            backupItem: function () {
+                return this.DanhSachNguyenLieuNhap.filter(item => item.Cancelled == false)
+            },
+            backupItem2: function () {
+                return this.TotalKey.filter(item => item.Cancel == false)
+            },
+            MaMau() {
+                return this.custinfileValue.filter(item => item.CustomFieldKey == 1);
+            },
+            Size() {
+                return this.custinfileValue.filter(item => item.CustomFieldKey == 2);
+            },
+            chuaNhapIndexes() {
+                const indexes = [];
+                this.DanhSachNguyenLieuNhap.forEach((item, index) => {
+                    try {
+                        const chiTietCusTom = JSON.parse(item.ChiTietCusTom);
+                        if (chiTietCusTom && chiTietCusTom.length > 0) {
+                            chiTietCusTom.forEach((chiTiet, chiTietIndex) => {
+                                if (item.SoLuongNhap !== chiTiet.QuantityProduct) {
+                                    indexes.push({ nguyenLieuIndex: index, chiTietIndex: chiTietIndex });
+                                }
+                            });
+                        }
+                    } catch (error) {
+                        console.error(`Error parsing JSON at index ${index}:`, error);
+                    }
+                });
+                return indexes;
+            },
+            CheckSoLuongChiTiet() {
+                if (this.backupItem2.length == 0) {
+                    return false;
+                }
+                let tong = this.TotalKey.reduce((accumulator, currentValue) => parseInt(accumulator) + parseInt(currentValue.QuantityProduct), 0);
+                if (tong == this.curentSoLuong) {
+                    return false;
+                }
+                else {
+                    return true;
+                }
+
+            },
+            //CheckCustom() {
+
+            //}
+        },
+        methods: {
+            fileSelected(evt, previewImage) {
+                evt.preventDefault()
+                const reader = new FileReader();
+                reader.readAsDataURL(evt.target.files[0]);
+                reader.onload = e => {
+                    document.getElementById(previewImage).style.backgroundImage = `url('${e.target.result}')`;
+                };
+                this.images.set(previewImage, evt.target.files[0]);
+            },
+            ImportExcel: function () {
+                this.IsImportExcell = true;
+                const CurrentThis = this;
+
+                let input = document.getElementById("fileEcell");
+                const file = input.files[0];
+                const reader = new FileReader();
+
+
+                reader.onload = (event) => {
+                    $('#preloader').fadeIn();
+                    const data = event.target.result;
+
+                    const workbook = XLSX.read(data, { type: 'binary' });
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+
+                    console.table("jsonData");
+                    console.table(jsonData);
+
+                    console.table("ban đầu:", CurrentThis.DanhSachNguyenLieu);
+
+                    let NguyenLieuChuaTonTai = [];
+
+                    for (const item1 of jsonData) {
+                        const exists = CurrentThis.DanhSachNguyenLieu.some(item2 => CurrentThis.removeAccents(item2.Name).trim().toLowerCase() === CurrentThis.removeAccents(item1["Tên Nguyên Phụ Liệu"]).trim().toLowerCase());
+                        if (!exists) {
+                            NguyenLieuChuaTonTai.push({ MaNguyenLieu: `${item1["Mã Kho"]}`, TenNguyenLieu: `${item1["Tên Nguyên Phụ Liệu"]}`, NgayNhap: "2023-01-01", SoLuong: 0, DonViTinh: "_" });
+                        }
+                    }
+                    console.table(NguyenLieuChuaTonTai);
+
+                    function TotalCustom(Id, nglId, Quan, color, size) {
+                        this.ID = Id;
+                        this.NguyenLieuID = nglId;
+                        this.ListCustom = [color, size];
+                        this.QuantityProduct = Quan;
+                        this.Cancel = false;
+
+                    }
+                    if (NguyenLieuChuaTonTai.length > 0) {
+                        let CurrentThis2 = CurrentThis;
+                        let curentJsonData = jsonData;
+                        fetch(`/NguyenLieu/AddNguyenLieuWhenNhapKho`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(NguyenLieuChuaTonTai),
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                fetch("/NguyenLieu/GetIdAndNameNguyenLieuAPI")
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        CurrentThis2.DanhSachNguyenLieu = data;
+                                    }).
+                                    then(data => {
+                                        for (let i = 0; i < jsonData.length; i++) {
+                                            for (let j = 0; j < CurrentThis2.DanhSachNguyenLieu.length; j++) {
+                                                let datajson = CurrentThis2.removeAccents(curentJsonData[i]['Tên Nguyên Phụ Liệu']).trim().toLowerCase();
+                                                let dataApi = CurrentThis2.removeAccents(CurrentThis2.DanhSachNguyenLieu[j]['Name']).trim().toLowerCase();
+                                                if (datajson == dataApi) {
+                                                    // sử lý màu sắc và cỡ
+                                                    let currentColor = jsonData[i]["Màu"];
+                                                    let currentSize = jsonData[i]["Cỡ"];
+                                                    let colorMatch = CurrentThis.custinfileValue.find(i => i.CustomFieldValue.normalize("NFD").localeCompare(currentColor, "vi", { sensitivity: "base" }) === 0);
+                                                    let sizeMatch = CurrentThis.custinfileValue.find(i => i.CustomFieldValue.normalize("NFD").localeCompare(currentSize, "vi", { sensitivity: "base" }) === 0);
+
+                                                    let id_color = colorMatch ? colorMatch.ID : null;
+                                                    let id_size = sizeMatch ? sizeMatch.ID : null;
+                                                    if (id_color !== null && id_size !== null) {
+                                                        id_color = CurrentThis.custinfileValue.filter(i => i.CustomFieldValue.normalize("NFD").localeCompare(currentColor, "vi", { sensitivity: "base" }) === 0)[0].ID;
+                                                        id_size = CurrentThis.custinfileValue.filter(i => i.CustomFieldValue.normalize("NFD").localeCompare(currentSize, "vi", { sensitivity: "base" }) === 0)[0].ID;
+                                                        let totalCutom = new TotalCustom(0, CurrentThis.DanhSachNguyenLieu[j]['Id'], jsonData[i]['Số lượng thực tế'], id_color, id_size)
+                                                        console.log("totalCutom", totalCutom);
+                                                        totalCutom.ListCustom = JSON.stringify(totalCutom.ListCustom);
+                                                        console.log("totalCutom.ListCustom", totalCutom.ListCustom)
+                                                        let data = new FormData();
+                                                        data.append("NguyenLieuID", CurrentThis.DanhSachNguyenLieu[j]['Id'])
+                                                        data.append("ListCustom", totalCutom.ListCustom)
+                                                        data.append("QuantityProduct", jsonData[i]['Số lượng thực tế']);
+
+
+                                                        fetch("/NguyenLieu/AddCustomTotal", {
+                                                            method: "POST",
+                                                            headers: {
+                                                                processData: false,
+                                                                contentType: false,
+                                                            },
+                                                            body: data
+                                                        });
+                                                        CurrentThis.DanhSachNguyenLieuNhap.push({
+                                                            Id: 0, NguyenLieuId: CurrentThis2.DanhSachNguyenLieu[j]['Id'],
+                                                            SoLuongNhap: curentJsonData[i]['Số lượng thực tế'],
+                                                            SoLuongNhapTrenChungTu: curentJsonData[i]['Số lượng chứng từ'],
+                                                            NhaCungCap: curentJsonData[i]['Tên khách hàng'],
+                                                            ChatLuong: "",
+                                                            DonGia: curentJsonData[i]['GIÁ'],
+                                                            NhapKhoId: 0,
+                                                            Cancelled: false,
+                                                            ChiTietCusTom: JSON.stringify([totalCutom]),
+                                                            MaKho: curentJsonData[i]['Mã Kho'],
+                                                            MaHaiQuan: curentJsonData[i]['Mã Hải Quan'],
+                                                            Solo: curentJsonData[i]['Số lo']
+                                                        });
+                                                    }
+                                                    else {
+                                                        // Xử lý khi không tìm thấy id_color hoặc id_size
+                                                        (async () => {
+                                                            let _data = new FormData();
+                                                            _data.append("ID", 0);
+                                                            _data.append("CustomFieldKey", 1);
+                                                            _data.append("CustomFieldValue", currentColor);
+                                                            _data.append("NguyenLieuId", CurrentThis.DanhSachNguyenLieu[j]['Id']);
+                                                            let response = await fetch("/NguyenLieu/AddCustom", {
+                                                                method: "POST",
+                                                                headers: {
+                                                                    processData: false,
+                                                                    contentType: false,
+                                                                },
+                                                                body: _data
+                                                            });
+
+                                                            let data = await response.json();
+
+                                                            console.log("data", data);
+                                                            let id_color = data.ID;
+                                                            console.log("data id_color 1", id_color);
+                                                            handle_size_more(id_color);
+                                                        })();
+
+                                                        async function handle_size_more(id_color) {
+                                                            let _data = new FormData();
+                                                            _data.append("ID", 0);
+                                                            _data.append("CustomFieldKey", 2);
+                                                            _data.append("CustomFieldValue", currentSize);
+                                                            _data.append("NguyenLieuId", CurrentThis.DanhSachNguyenLieu[j]['Id']);
+                                                            let response2 = await fetch("/NguyenLieu/AddCustom", {
+                                                                method: "POST",
+                                                                headers: {
+                                                                    processData: false,
+                                                                    contentType: false,
+                                                                },
+                                                                body: _data
+                                                            });
+
+                                                            let data2 = await response2.json();
+
+                                                            console.log("data2", data2);
+                                                            let id_size = data2.ID;
+                                                            console.log("data id_size 1", id_size);
+                                                            handleAdd1(id_color, id_size);
+                                                        }
+
+                                                        async function handleAdd1(id_color, id_size) {
+                                                            let totalCutom = new TotalCustom(0, CurrentThis2.DanhSachNguyenLieu[j]['Id'], jsonData[i]['Số lượng thực tế'], id_color, id_size);
+                                                            console.log("totalCutom", totalCutom);
+                                                            totalCutom.ListCustom = JSON.stringify(totalCutom.ListCustom);
+                                                            let data = new FormData();
+                                                            data.append("NguyenLieuID", CurrentThis2.DanhSachNguyenLieu[j]['Id']);
+                                                            data.append("ListCustom", totalCutom.ListCustom);
+                                                            data.append("QuantityProduct", curentJsonData[i]['Số lượng thực tế']);
+                                                            debugger;
+                                                            await fetch("/NguyenLieu/AddCustomTotal", {
+                                                                method: "POST",
+                                                                headers: {
+                                                                    processData: false,
+                                                                    contentType: false,
+                                                                },
+                                                                body: data
+                                                            });
+
+                                                            // Kết thúc xử lý màu sắc và cỡ
+                                                            CurrentThis.DanhSachNguyenLieuNhap.push({
+                                                                Id: 0,
+                                                                NguyenLieuId: CurrentThis2.DanhSachNguyenLieu[j]['Id'],
+                                                                SoLuongNhap: curentJsonData[i]['Số lượng thực tế'],
+                                                                SoLuongNhapTrenChungTu: curentJsonData[i]['Số lượng chứng từ'],
+                                                                NhaCungCap: curentJsonData[i]['Tên khách hàng'],
+                                                                ChatLuong: "",
+                                                                DonGia: curentJsonData[i]['GIÁ'],
+                                                                NhapKhoId: 0,
+                                                                Cancelled: false,
+                                                                ChiTietCusTom: JSON.stringify([totalCutom]),
+                                                                MaKho: curentJsonData[i]['Mã Kho'],
+                                                                MaHaiQuan: curentJsonData[i]['Mã Hải Quan'],
+                                                                Solo: curentJsonData[i]['Số lo']
+                                                            });
+
+                                                            CurrentThis.init();
+                                                        }
+                                                    }
+
+
+                                                    //kết thúc sử lý màu sắc và cỡ
+                                                }
+                                                }
+                                            }
+                                            $('#preloader').fadeOut();
+                                        });
+                            })
+                            .catch(error => console.error(error));
+                    } else {
+                        for (let i = 0; i < jsonData.length; i++) {
+                            for (let j = 0; j < CurrentThis.DanhSachNguyenLieu.length; j++) {
+                                let datajson = CurrentThis.removeAccents(jsonData[i]['Tên Nguyên Phụ Liệu']).trim().toLowerCase();
+                                let dataApi = CurrentThis.removeAccents(CurrentThis.DanhSachNguyenLieu[j]['Name']).trim().toLowerCase();
+                                if (datajson == dataApi) {
+                                    // sử lý màu sắc và cỡ
+                                    let currentColor = jsonData[i]["Màu"];
+                                    let currentSize = jsonData[i]["Cỡ"];
+                                    let id_color = CurrentThis.custinfileValue.filter(i => i.CustomFieldValue.normalize("NFD").localeCompare(currentColor, "vi", { sensitivity: "base" }) === 0)
+                                    let id_size = CurrentThis.custinfileValue.filter(i => i.CustomFieldValue.normalize("NFD").localeCompare(currentSize, "vi", { sensitivity: "base" }) === 0)
+                                    let _id_color = 0;
+                                    let _id_size = 0;
+                                    console.log("id_color", id_color);
+                                    // handle when color and size don't exist yet
+                                    if (typeof id_color == 'undefined' || id_color.length == 0) {
+                                        (async () => {
+                                            let _data = new FormData();
+                                            _data.append("ID", 0);
+                                            _data.append("CustomFieldKey", 1);
+                                            _data.append("CustomFieldValue", currentColor);
+                                            _data.append("NguyenLieuId", CurrentThis.DanhSachNguyenLieu[j]['Id']);
+                                            let response = await fetch("/NguyenLieu/AddCustom", {
+                                                method: "POST",
+                                                headers: {
+                                                    processData: false,
+                                                    contentType: false,
+                                                },
+                                                body: _data
+                                            });
+
+                                            let data = await response.json();
+
+                                            console.log("data", data);
+                                            _id_color = data.ID;
+                                            console.log("data id_color 1", _id_color);
+                                            handle_size();
+
+                                        })();
+                                    }
+                                    else {
+                                        _id_color = id_color[0].ID
+                                        handle_size();
+                                    }
+
+                                    //handle size
+                                    function handle_size() {
+                                        if (typeof id_size == 'undefined' || id_size.length == 0) {
+                                            (async () => {
+                                                let _data = new FormData();
+                                                _data.append("ID", 0);
+                                                _data.append("CustomFieldKey", 2);
+                                                _data.append("CustomFieldValue", currentSize);
+                                                _data.append("NguyenLieuId", CurrentThis.DanhSachNguyenLieu[j]['Id']);
+                                                let response2 = await fetch("/NguyenLieu/AddCustom", {
+                                                    method: "POST",
+                                                    headers: {
+                                                        processData: false,
+                                                        contentType: false,
+                                                    },
+                                                    body: _data
+                                                });
+
+                                                let data2 = await response2.json();
+
+                                                console.log("data2", data2);
+                                                _id_size = data2.ID;
+                                                console.log("data id_size 1", _id_size);
+                                                handleAdd();
+                                            })();
+                                        }
+                                        else {
+                                            _id_size = id_size[0].ID;
+                                            handleAdd()
+                                        }
+                                    }
+
+                                    //handle add
+
+                                    function handleAdd() {
+                                        let totalCutom = new TotalCustom(0, CurrentThis.DanhSachNguyenLieu[j]['Id'], jsonData[i]['Số lượng thực tế'], _id_color, _id_size)
+                                        console.log("totalCutom", totalCutom)
+                                        totalCutom.ListCustom = JSON.stringify(totalCutom.ListCustom)
+                                        //kết thúc sử lý màu sắc và cỡ
+                                        CurrentThis.DanhSachNguyenLieuNhap.push({ Id: 0, NguyenLieuId: CurrentThis.DanhSachNguyenLieu[j]['Id'], SoLuongNhap: jsonData[i]['Số lượng thực tế'], SoLuongNhapTrenChungTu: jsonData[i]['Số lượng chứng từ'], NhaCungCap: jsonData[i]['Tên khách hàng'], ChatLuong: "", NhapKhoId: 0, DonGia: jsonData[i]['GIÁ'], Cancelled: false, ChiTietCusTom: JSON.stringify([totalCutom]), MaKho: jsonData[i]['Mã Kho'], MaHaiQuan: jsonData[i]['Mã Hải Quan'], Solo: jsonData[i]['Số lo'] });
+                                        CurrentThis.init();
+                                    }
+                                }
+                            }
+                        }
+
+                        $('#preloader').fadeOut();
+                    }
+                };
+                reader.readAsBinaryString(file);
+
+            },
+
+            
+            Xoa: function (index) {
+                if (this.DanhSachNguyenLieuNhap.filter(item => item.Cancelled == false).length > 1) {
+                    this.DanhSachNguyenLieuNhap[index].Cancelled = true
+                }
+                if (this.DanhSachNguyenLieuNhap[index].Cancelled == true && this.items[index].Id == 0) {
+                    this.DanhSachNguyenLieuNhap.splice(index, 1);
+                }
+
+            },
+            ThemMoi: function () {
+                this.DanhSachNguyenLieuNhap.push({
+                    Id: 0,
+                    NguyenLieuId: 0,
+                    SoLuongNhap: 0,
+                    NhapKhoId: 0,
+                    ChatLuong: "",
+                    NhaCungCap: "",
+                    DonGia: 0,
+                    Solo: "",
+                    SoLuongNhapTrenChungTu: 0,
+                    Cancelled: false,
+                    ChiTietCusTom: "",
+                    MaKho: "",
+                    MaHaiQuan: ""
+                });
+            },
+            PhuongThucNhap: function (TrangThai) {
+                let curenntThis = this;
+
+                if (TrangThai == 2) {
+                    this.IsNhapKhoLyThuyet = false;
+                    this.IsNhapKhoLyThuyet2 = false;
+                    this.IsImportExcell = true;
+                } else if (TrangThai == 3) {
+                    this.IsNhapKhoLyThuyet = true;
+                    this.IsImportExcell = false;
+                    fetch("/NhapKhoLyThuyet/GetListNhapKhoLyThuyetKhiChuaNhap").then(res => res.json()).then(data => {
+                        curenntThis.DanhSachLayTuNhapKhoLyThuyet = data;
+
+                    })
+                }
+                else if (TrangThai == 4) {
+                    fetch("/NhapKhoLyThuyet2/GetListNhapKhoLyThuyetKhiChuaNhap").then(res => res.json()).then(data => {
+                        curenntThis.DanhSachLayTuNhapKhoLyThuyet = data;
+                        this.IsNhapKhoLyThuyet = false;
+                        this.IsNhapKhoLyThuyet2 = true;
+                        this.IsImportExcell = false;
+
+                    })
+                }
+                else {
+                    this.IsImportExcell = false;
+                    this.IsNhapKhoLyThuyet = false;
+                    this.IsNhapKhoLyThuyet2 = false;
+                }
+            },
+            removeAccents(str) {
+                var AccentsMap = [
+                    "aàảãáạăằẳẵắặâầẩẫấậ",
+                    "AÀẢÃÁẠĂẰẲẴẮẶÂẦẨẪẤẬ",
+                    "dđ", "DĐ",
+                    "eèẻẽéẹêềểễếệ",
+                    "EÈẺẼÉẸÊỀỂỄẾỆ",
+                    "iìỉĩíị",
+                    "IÌỈĨÍỊ",
+                    "oòỏõóọôồổỗốộơờởỡớợ",
+                    "OÒỎÕÓỌÔỒỔỖỐỘƠỜỞỠỚỢ",
+                    "uùủũúụưừửữứự",
+                    "UÙỦŨÚỤƯỪỬỮỨỰ",
+                    "yỳỷỹýỵ",
+                    "YỲỶỸÝỴ"
+                ];
+                for (var i = 0; i < AccentsMap.length; i++) {
+                    var re = new RegExp('[' + AccentsMap[i].substr(1) + ']', 'g');
+                    var char = AccentsMap[i][0];
+                    if (str != undefined) {
+                        str = str.toString().replace(re, char);
+                    }
+                    else {
+                        continue;
+                    }
+                }
+                return str;
+            },
+            init: function () {
+                fetch("/NguyenLieu/GetIdAndNameNguyenLieuAPI")
+                    .then(res => res.json())
+                    .then(data => { this.DanhSachNguyenLieu = data; });
+
+                fetch("/NguyenLieu/GetApiCustomfield").then(res => res.json()).then(data => { this.customfile = data })
+                fetch("/NguyenLieu/GetApiCustomfieldValue").then(res => res.json()).then(data => { this.custinfileValue = data; console.log("GetApiCustomfieldValue", data) })
+
+                document.getElementById("inlineRadio1").click();
+
+                if (@Html.Raw(@Model.Id) > 0) {
+                    this.IsImportExcell = true;
+                    document.querySelectorAll(".form-check-inline").forEach(item => {
+                        item.style.display = "none";
+                    });
+                    const inputs = document.querySelectorAll('input');
+                    inputs.forEach(input => {
+                        input.disabled = true;
+                    });
+                    setTimeout(() => {
+                        document.getElementById("fileEcell2").style.display = "none";
+                    }, 200)
+
+                }
+            },
+            makeid: function (length) {
+                let result = '';
+                const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                const charactersLength = characters.length;
+                let counter = 0;
+                while (counter < length) {
+                    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+                    counter += 1;
+                }
+                return result;
+            },
+            formatTienTe: function (value) {
+                var DecimalSeparator = Number('1.2').toLocaleString().substr(1, 1);
+                var priceWithCommas = value.toLocaleString();
+                var arParts = String(priceWithCommas).split(DecimalSeparator);
+                var intPart = arParts[0];
+                return intPart + " " + this.symbol;
+            },
+            downloadFile: function () {
+                $('#preloader').fadeIn();
+                const fileUrl = '/upload/excel/Example2.xlsx';
+                const link = $('<a>', {
+                    href: fileUrl,
+                    download: 'Example.xlsx'
+                }).appendTo('body');
+                link[0].click();
+                link.remove();
+                $('#preloader').fadeOut();
+            },
+            LayTuNhapKhoLyThuyet: function (event) {
+                let id = event.target.value;
+                const CurentThis = this;
+                CurentThis.DanhSachNguyenLieuNhap = [];
+                CurentThis.NhapKhoLyThuyetId = id;
+                fetch(`/NhapKhoLyThuyet/GetListNguyenLieuNhapKhoLyThuyetKhiChuaNhapByID?nhakholythuyet=${id}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        console.log(data);
+                        data.forEach(item => {
+                            CurentThis.DanhSachLayTuNhapKhoLyThuyet.forEach(item => {
+                                CurentThis.MaLo = item.MaLo;
+                            });
+                            CurentThis.DanhSachNguyenLieuNhap.push({
+                                Id: 0,
+                                NguyenLieuId: item.NguyenLieuId,
+                                SoLuongNhap: 0,
+                                NhapKhoId: 0,
+                                ChatLuong: item.ChatLuong,
+                                NhaCungCap: item.NhaCungCap,
+                                DonGia: item.DonGia,
+                                SoLuongNhapTrenChungTu: item.SoLuongMua,
+                                Cancelled: false,
+                                MaHaiQuan: item.MaHaiQuan,
+                                ChiTietCusTom: "",
+                                Solo: CurentThis.MaLo
+                            });
+
+                        })
+                    })
+            },
+            LayTuNhapKhoLyThuyet2: function (event) {
+                let id = event.target.value;
+                const CurentThis = this;
+                CurentThis.DanhSachNguyenLieuNhap = [];
+                CurentThis.NhapKhoLyThuyetId = id;
+                fetch(`/NhapKhoLyThuyet2/GetListNguyenLieuNhapKhoLyThuye2tKhiChuaNhapByID?nhakholythuyet=${id}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        console.log(data);
+                        data.forEach(item => {
+                            CurentThis.DanhSachLayTuNhapKhoLyThuyet.forEach(item => {
+                                CurentThis.MaLo = item.MaLo;
+                            });
+                            CurentThis.DanhSachNguyenLieuNhap.push({
+                                Id: 0,
+                                NguyenLieuId: item.NguyenLieuId,
+                                SoLuongNhap: 0,
+                                NhapKhoId: 0,
+                                ChatLuong: item.ChatLuong,
+                                NhaCungCap: item.NhaCungCap,
+                                DonGia: item.DonGia,
+                                SoLuongNhapTrenChungTu: item.SoLuongMua,
+                                Cancelled: false,
+                                MaHaiQuan: item.MaHaiQuan,
+                                ChiTietCusTom: "",
+                                Solo: CurentThis.MaLo
+                            });
+
+                        })
+                    })
+            },
+
+            Custom: async function (event, NlId, index) {
+
+                const selectedNguyenLieuId = event.target.value;
+                console.log("selectedNguyenLieuId", selectedNguyenLieuId);
+                console.log("NlId", NlId);
+                this.currentNguyenLieu = NlId;
+                this.currentIndexDanhSachNguyenLieuNhap = index;
+                this.curentSoLuong = this.DanhSachNguyenLieuNhap[index].SoLuongNhap;
+                if ("@Model.Id" == 0 || this.DanhSachNguyenLieuNhap[index].ChiTietCusTom.length == 0) {
+                    let res = await fetch("/NguyenLieu/GetTotalKeyByNguyenLieuId?nlid=" + NlId);
+                    let _data = await res.json();
+                    console.log("_data", _data);
+
+                    this.DanhSachNguyenLieuNhap[index].ChiTietCusTom = JSON.stringify(_data);
+                }
+
+                if (this.DanhSachNguyenLieuNhap[index].ChiTietCusTom) {
+                    let saveData = JSON.parse(this.DanhSachNguyenLieuNhap[index].ChiTietCusTom);
+                    saveData.forEach(item => {
+                        item.ListCustom = JSON.parse(item.ListCustom);
+                    })
+                    this.TotalKey = saveData;
+                    this.TotalKey = saveData.map(item => {
+                        item.QuantityProduct = this.curentSoLuong;
+                        return item;
+                    });
+                    console.log(" this.TotalKey", this.TotalKey)
+                };
+
+                let tenNl = this.DanhSachNguyenLieu.filter(item => item.Id == NlId)[0].Name;
+
+                $("#myModal2").modal("show");
+                document.getElementById("title_nguyenLieu").innerHTML = tenNl;
+
+            },
+            closeModelChild: function () {
+
+                this.TotalKey = [];
+                $("#myModal2").modal("hide");
+                $(".modal").css({
+                    "overflow-y": "auto",
+                    "overflow-x": "hidden"
+                });
+            },
+            ThemCon: function (nlid) {
+                this.TotalKey.push({
+                    ID: 0,
+                    NguyenLieuID: nlid,
+                    ListCustom: [0, 0],
+                    QuantityProduct: 0,
+                    Cancel: false
+                });
+
+            },
+            deleteList(index) {
+                if (this.TotalKey.filter(item => item.Cancel == false)) {
+                    this.TotalKey[index].Cancel = true
+                }
+                if (this.TotalKey[index].Cancel == true && this.TotalKey[index].ID == 0) {
+                    this.TotalKey.splice(index, 1);
+                }
+            },
+            SaveModelChild() {
+                this.TotalKey.forEach(item => {
+                    item.ListCustom = JSON.stringify(item.ListCustom)
+                })
+                let saveData = JSON.stringify(this.TotalKey)
+                this.DanhSachNguyenLieuNhap[this.currentIndexDanhSachNguyenLieuNhap].ChiTietCusTom = saveData;
+
+                this.closeModelChild();
+            },
+
+        }
+    });
+
+
+</script>

@@ -1,0 +1,35 @@
+﻿@model AMS.Models.AccountViewModels.LoginViewModel;
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+@{
+    HttpContext httpContext = HttpContextAccessor.HttpContext;
+    string loginUserName = httpContext.Session.GetString("LoginUserName");
+}
+
+
+<nav class="main-header navbar navbar-expand navbar-white navbar-light" id="nav-header">
+
+    <ul class="navbar-nav ml-auto">
+        <li>
+            <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" id="logoutForm">
+                <input type="hidden" asp-for="Longitude" id="Longitude" />
+                <input type="hidden" asp-for="Latitude" id="Latitude" />
+
+                <div class="form-group pull-right row" style="margin:10px;">
+                    <p class="btn btn-info" id="email">Hi! @loginUserName!</p>
+                    <button type="submit" onclick="SignOutAction()" class="btn btn-danger">Đăng xuất</button>
+                </div>
+            </form>
+        </li>
+    </ul>
+</nav>
+<script src="~/js/LoginOperation.js"></script>
+
+<script>
+    $(document).ready(function () {
+        SetGeolocation();
+    });
+
+
+</script>

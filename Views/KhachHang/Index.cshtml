@@ -1,0 +1,65 @@
+<link rel="stylesheet" href="~/css/views/KhachHang/IndexKhachHang.css" />
+<div class="wrapper view-index-KhachHang">
+    <div class="panel panel-hash">
+        <div class="panel-heading">
+            <br />
+            <div class="top_content_heading">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="pull-left page-title">
+                            <h3>Quản lý khách hàng</h3>
+                        </div>
+                        <div class="pull-right controlls">
+                            <a href="javascript:void(0)" onclick="AddEdit(0)">
+                                <div class="info-box">
+                                    <span class="info-box-icon bg-success elevation-1"><i class="fas fa-plus-square"></i></span>
+                                    <div class="info-box-content">
+                                        <span class="info-box-number">
+                                            Thêm
+                                        </span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-body scroll panel-height">
+            <table id="tblKhachHang" class="table table-bordered table-striped" style="width:100%">
+                <thead class="bg-secondary">
+                    <tr>
+                        <th>Xem</th>
+                        <th>Họ và Tên</th>
+                        <th>Nhóm khách hàng</th>
+                        <th>Số Điện Thoại</th>
+                        <th>Địa Chỉ</th>
+                        <th>Ghi Chú</th>
+                        <th>Ngày tạo</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .panel-heading {
+        padding: 0px 0px 0px 5px;
+    }
+
+    .panel-body {
+        padding: 5px;
+    }
+
+    .h4 {
+        margin-top: 1px;
+        margin-bottom: 1px;
+    }
+</style>
+
+<script src="~/js/KhachHang/KhachHang_CRUD.js"></script>
+<script src="~/js/KhachHang/KhachHang_Datatable.js"></script>

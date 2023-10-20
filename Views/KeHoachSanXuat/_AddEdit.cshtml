@@ -1,0 +1,532 @@
+@model AMS.Models.KeHoachSanXuatViewModel.KeHoachSanXuatCRUDViewModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+<link rel="stylesheet" href="~/css/views/KeHoachSanXuat/EditKeHoachSanXuat.css" />
+<div id="AppKeHoachSanXuat" class="view-add-edit view-edit-KeHoachSanXuat">
+    <div class="row">
+        <div class="col-md-12">
+            <form id="frmKeHoachSanXuat">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="CreatedDate" />
+                <input type="hidden" asp-for="CreatedBy" />
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label asp-for="TenThanhPham" class="control-label"></label>
+                            <input asp-for="TenThanhPham" class="form-control" />
+                            <span asp-validation-for="TenThanhPham" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-check btn btn-outline-secondary m-2">
+                            <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1" value="option1" checked v-on:change="PhuongThucNhap(1)">
+                            <label class="form-check-label" for="exampleRadios1">
+                                Lập kế hoạch lựa chọn
+                            </label>
+                        </div>
+
+                        <div class="form-check btn-outline-success btn m-2">
+                            <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios2" value="option2" v-on:change="PhuongThucNhap(2)">
+                            <label class="form-check-label" for="exampleRadios2">
+                                Lập kế hoạch theo công thức
+                            </label>
+                        </div>
+
+                        <div class="form-check btn-outline-primary btn m-2">
+                            <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios3" value="option2" v-on:change="PhuongThucNhap(3)">
+                            <label class="form-check-label" for="exampleRadios3">
+                                Nhập kế hoạch bằng file excel
+                            </label>
+                        </div>
+
+                        <div class="col-12 row" v-show="isImportExcel">
+                            <div class="col-9 text-center">
+                                <div class="input-group m-3">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="inputGroupFileAddon01">Upload</span>
+                                    </div>
+                                    <div class="custom-file">
+                                        <input type="file" class="custom-file-input" id="excelFile" aria-describedby="inputGroupFileAddon01" v-on:change="HandleExcelFile()">
+                                        <label class="custom-file-label" for="excelFile">Choose file</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-3 ">
+                                <div class="m-3 btn btn-info" v-on:click="donwloadTemplate()">File mẫu</div>
+                            </div>
+                        </div>
+
+                        <div v-if="CongThuc" class="row">
+                            <div class="form-group col-6">
+                                <label class="control-label">Chọn công thức</label>
+                                <select class="form-control" v-on:change="TheoCongThuc($event)">
+                                    <option disabled selected value="">Chọn công thức</option>
+                                    <option v-for="nlct in DanhSachNguyenLieuCongThuc" v-bind:key="nlct.Id" v-bind:value="nlct.Id">{{nlct.Name}}</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-4">
+                                <label asp-for="SoLuongThanhPham" class="control-label"></label>
+                                <input asp-for="SoLuongThanhPham" v-on:keyup="TinhLai($event)" class="form-control" type="number" />
+                                <span asp-validation-for="SoLuongThanhPham" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="NgayDuKienHoan" class="control-label"></label>
+                            <input asp-for="NgayDuKienHoan" class="form-control" type="date" />
+                            <span asp-validation-for="NgayDuKienHoan" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <h3 class="col-12 m-1 text-lg-center text-danger">Nguyên liệu dựa trên kế hoạch</h3>
+                    <table class="table table-responsive">
+                        <thead>
+                            <tr>
+                                <th scope="col">NO</th>
+                                <th scope="col" class="text-nowrap" style="width: 12em;">Miêu tả</th>
+                                <th scope="col" class="text-nowrap" style="width: 12em;">Tên nguyên liệu</th>
+                                <th scope="col" class="text-nowrap" style="width: 6em;">Số mét chỉ</th>
+                                <th scope="col" class="text-nowrap" style="width: 12em;">Cách sử dụng</th>
+                                <th scope="col" class="text-nowrap" style="width: 5em;">Đơn vị </th>
+                                <th scope="col" class="text-nowrap" style="width: 8em;">Số lượng</th>
+                                <th scope="col" class="text-nowrap" style="width: 8em;">Định mức</th>
+                                <th scope="col" class="text-nowrap" style="width: 8em;">Nhu cầu</th>
+                                <th scope="col" class="text-nowrap" style="width: 8em;">Đang có</th>
+                                <th scope="col" class="text-nowrap" style="width: 6em;">Số lô</th>
+                                <th scope="col" class="text-nowrap">Ngày về VIT</th>
+                                <th scope="col" class="text-nowrap" style="width: 7em;">Thực nhận</th>
+                                <th scope="col"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(item,index) in backupitem"  key="index">
+                                <td scope="row">{{index+1}}</td>
+                                <td scope="row">
+                                    <input v-model="item.MieuTa" class="form-control" />
+                                </td>
+                                <td scope="row">
+                                    <select v-model="item.NguyenLieuId" class="form-control" ref="selectRef" v-on:change="autoFill(index)" :disabled="isImportExcel">
+                                        <option disabled value="">Chọn nguyên liệu</option>
+                                        <option v-for="nl in DanhSachNguyenLieu" v-bind:key="nl.Id" v-bind:value="nl.Id">{{ nl.Name }}</option>
+                                        <div v-if="item.NguyenLieuId === null" class="alert alert-danger">Vui lòng chọn nguyên liệu</div>
+                                    </select>
+                                </td>
+                                <td scope="row">
+                                    <input v-model="item.SoMetChi" class="form-control" />
+                                </td>
+                                <td scope="row">
+                                    <textarea v-model="item.CachSuDung" class="form-control" />
+                                </td>
+                                <td scope="row">
+                                    <input v-model="item.DonVi" class="form-control" />
+                                </td>
+                                <td scope="row">
+                                    <input v-model="item.SoLuong" type="number" class="form-control" />
+                                    <div v-if="item.SoLuong == 0" class="alert alert-danger">Vui lòng nhập số lượng</div>
+                                </td>
+                                <td scope="row"><input v-model="item.DinhMuc" type="text" class="form-control" /></td>
+                                <td scope="row">
+                                    <input type="text" :value="item.SoLuong * item.DinhMuc"  class="form-control" readonly />
+                                </td>
+                                <td scope="row">
+                                    <input type="text" v-model="item.Co" class="form-control" readonly />
+                                </td>
+                                <td scope="row"><input v-model="item.SoLo" type="text" class="form-control" /></td>
+
+                                <td scope="row"><input v-model="item.NgayVeVIT" type="date" class="form-control" /></td>
+                                <td scope="row"><input v-model="item.ThucNhan" type="text" class="form-control" /></td>
+                                <td scope="row">
+                                    <button class="btn btn-secondary m-1" type="button" v-on:click="Custom($event,item.NguyenLieuId, index)">Chi Tiết</button>
+                                    <button class="btn btn-warning" type="button" v-on:click="Xoa(index)">Xoá</button>
+
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="13">
+                                    <button type="button" v-if="!CongThuc" class="btn btn-primary float-lg-right" v-on:click="ThemMoi()">Thêm</button>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div class="form-group">
+                    <input type="button" id="btnSave" value="Lưu" onclick="Save()" :disabled="CanhBao" class="btn btn-info">
+                    <button type="button" id="btnClose" class="btn btn-danger" data-dismiss="modal">Đóng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="myModal2" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="title_nguyenLieu"></h4>
+                </div><div class="container"></div>
+                <div class="modal-body">
+                    <table class="table table-responstive">
+                        <thead>
+                            <tr>
+                                <th v-for="(item, index) in customfile">
+                                    <p>{{item.FieldName}}</p>
+                                </th>
+                                <th>Số lượng</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(itemss,index) in TotalKey" :key="index">
+                                <td>
+                                    <select v-model="itemss.ListCustom[0]" class="form-control">
+                                        <option v-for="nl in MaMau" v-bind:key="nl.ID" v-bind:value="nl.ID">{{ nl.CustomFieldValue }}</option>
+                                    </select>
+                                </td>
+
+                                <td>
+                                    <select v-model="itemss.ListCustom[1]" class="form-control">
+                                        <option v-for="nl in Size" v-bind:key="nl.ID" v-bind:value="nl.ID">{{ nl.CustomFieldValue }}</option>
+                                    </select>
+                                </td>
+
+                                <td>
+                                    <input type="text" v-model="itemss.QuantityProduct" class="form-control" />
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-danger" v-on:click="deleteList(index)">Xóa</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3"></td>
+                                <td><button type="button" class="btn btn-warning" v-on:click="ThemCon(currentNguyenLieu)">Thêm</button></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" v-on:click="SaveModelChild()">Lưu</button>
+                    <button type="button" class="btn btn-danger" v-on:click="closeModelChild()">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script lang="javascript" src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+<script src="/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
+
+<script type="text/javascript">
+    AppKeHoachSanXuat = new Vue({
+        el: '#AppKeHoachSanXuat',
+        mounted() {
+            this.init();
+        },
+        data: {
+            Id: @Html.Raw(@Model.Id),
+            TenThanhPham: "@Html.Raw(@Model.TenThanhPham)",
+            NgayDuKienHoan: "@Html.Raw(@Model.NgayDuKienHoan)",
+            images: new Map(),
+            previewImageThumb: "/images/DefaultAsset/image_thumb.png",
+            previewImage: null,
+            items: @Html.Raw(ViewBag._LoadThanhPhamSanXuat),
+            CongThuc: false,
+            DanhSachNguyenLieu: [],
+            DanhSachNguyenLieuCongThuc: [],
+            isImportExcel: false,
+            customfile: [],
+            custinfileValue: [],
+            TotalKey: [],
+            currentNguyenLieu: 0,
+            currentIndexDanhSachNguyenLieuNhap: 0,
+            NguyenLieuId: null,
+        },
+        computed: {
+            backupitem: function () {
+                return this.items.filter(item => item.Cancelled == false)
+            },
+            CanhBao() {
+                let count = 0;
+                this.items.forEach((i, index) => {
+                    if (this.items[index].SoLuongCan > this.items[index].Co) {
+                        count++;
+                    }
+                    else {
+                        count;
+                    }
+                })
+                if (count == 0) {
+                    return false;
+                }
+                else {
+                    return true;
+                }
+            },
+            MaMau() {
+                return this.custinfileValue.filter(item => item.CustomFieldKey == 1);
+            },
+            Size() {
+                return this.custinfileValue.filter(item => item.CustomFieldKey == 2);
+            },
+            backupItem2: function () {
+                return this.TotalKey.filter(item => item.Cancel == false)
+            },
+            
+        },
+        methods: {
+            init: function () {
+                fetch("/NguyenLieu/GetIdAndNameNguyenLieuAPI")
+                    .then(res => res.json())
+                    .then(data => { this.DanhSachNguyenLieu = data; console.log("GetIdAndNameNguyenLieuAPI: ", data) });
+
+                fetch("/KeHoachSanXuat/GetApiCongThuc")
+                    .then(res => res.json())
+                    .then(data => { this.DanhSachNguyenLieuCongThuc = data; console.log("GetApiCongThuc ",data) });
+
+                fetch("/NguyenLieu/GetApiCustomfield").then(res => res.json()).then(data => { this.customfile = data })
+
+                fetch("/NguyenLieu/GetApiCustomfieldValue").then(res => res.json()).then(data => { this.custinfileValue = data })
+
+
+            },
+            
+            TheoCongThuc(event) {
+                this.CongThuc = true;
+                let a = event.target.value;
+                console.log(event.target.value);
+                const curentThis = this;
+                console.log("items", curentThis.items);
+                console.log("a", a);
+                curentThis.items.splice(0, curentThis.items.length);
+                console.log("DanhSachNguyenLieuCongThuc", this.DanhSachNguyenLieuCongThuc)
+
+                for (let i = 0; i < this.DanhSachNguyenLieuCongThuc.length; i++) {
+                    let item = curentThis.DanhSachNguyenLieuCongThuc[i];
+                    if (item.ListNguyenLieuInCongThuc.some(nl => nl.SanPhamId == a)) {
+                        item.ListNguyenLieuInCongThuc.forEach(nl => {
+                            if (nl.SanPhamId == a) {
+                                curentThis.items.push({
+                                    Id: 0,
+                                    MieuTa: nl.MieuTa,
+                                    NguyenLieuId: nl.NguyenLieuId,
+                                    KeHoachSanXuatId: 0,
+                                    SanPhamId: 0,
+                                    SoMetChi: nl.SoMetChi,
+                                    CachSuDung: nl.CachSuDung,
+                                    DonVi: nl.DonVi,
+                                    SoLuong: nl.SoLuong,
+                                    DinhMuc: nl.DinhMuc,
+                                    NhuCau: nl.NhuCau,
+                                    SoLo: nl.SoLo,
+                                    NgayVeVIT: nl.NgayVeVIT,
+                                    ThucNhan: nl.ThucNhan,
+                                    ListSizeMau: "",
+                                    Co: nl.SoLuongDangCo,
+                                    Cancelled: false
+                                });
+                            }
+                        });
+                    }
+                }
+        
+            },
+
+            PhuongThucNhap: function (TrangThai) {
+                if (TrangThai == 2) {
+                    this.CongThuc = true;
+                    this.isImportExcel = false;
+                }
+                else if (TrangThai == 3) {
+                    this.isImportExcel = true;
+                    this.CongThuc = false;
+                }
+                else {
+                    this.CongThuc = false;
+                    this.isImportExcel = false;
+                }
+
+            },
+            Xoa: function (index) {
+                if (this.items.filter(item => item.Cancelled == false).length > 1) {
+                    this.items[index].Cancelled = true
+                }
+                if (this.items[index].Cancelled == true && this.items[index].Id == 0) {
+                    this.items.splice(index, 1);
+                }
+            },
+            ThemMoi: function () {
+              this.items.Co = this.itemCo;
+
+                this.items.push ( {
+                    Id: 0,
+                    MieuTa: "",
+                    NguyenLieuId: null,
+                    KeHoachSanXuatId: 0,
+                    SanPhamId: 0,
+                    SoMetChi: 0,
+                    CachSuDung: "",
+                    DonVi: "",
+                    SoLuong: 0,
+                    DinhMuc: "",
+                    NhuCau: "",
+                    SoLo: "",
+                    NgayVeVIT: "",
+                    ThucNhan: "",
+                    ListSizeMau: "",
+                    Co: 0,
+                    Cancelled: false,
+
+                });
+            },
+            
+
+            donwloadTemplate() {
+                $('#preloader').fadeIn();
+                const fileUrl = '/upload/excel/TemplateLSX.xlsx';
+                const link = $('<a>', {
+                    href: fileUrl,
+                    download: 'TemplateLSX.xlsx'
+                }).appendTo('body');
+                link[0].click();
+                link.remove();
+                $('#preloader').fadeOut();
+            },
+
+            HandleExcelFile() {
+                if (!this.isImportExcel) {
+                    console.log("Không có file tồn tại")
+                    return;
+                }
+
+                let file = document.getElementById("excelFile").files[0];
+                document.getElementById("excelFile").nextElementSibling.innerHTML = file.name;
+
+                let CurrentThis = this;
+                let reader = new FileReader();
+
+                reader.onload = (event) => {
+                    $('#preloader').fadeIn();
+                    const data = event.target.result;
+
+
+                    const workbook = XLSX.read(data, { type: 'binary' });
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+                    console.table(jsonData);
+                    let countData = jsonData.length;
+                    for (let i = 0; i < countData; i++) {
+                        console.log(jsonData[i]["Tên nguyên liệu"]);
+                        let idNl;
+                        let dangCo;
+
+                        try{
+                        idNl = CurrentThis.DanhSachNguyenLieu.filter(_i => _i.Name.toLowerCase().trim().includes(jsonData[i]["Tên nguyên liệu"].toLowerCase().trim()))[0].Id;
+                        dangCo = CurrentThis.DanhSachNguyenLieu.filter(_i => _i.Name.toLowerCase().trim().includes(jsonData[i]["Tên nguyên liệu"].toLowerCase().trim()))[0].SoLuongDangCo;
+
+                        }
+                        catch(err){
+                            alert("Nguyên liệu không tồn tại trong ứng dụng");
+                            $('#preloader').fadeOut();
+                            return;
+                        }
+                        console.log("idNl", idNl)
+
+                        CurrentThis.items.push({
+                            Id: 0,
+                            MieuTa: jsonData[i]["Miêu tả"],
+                            NguyenLieuId: idNl,
+                            KeHoachSanXuatId: 0,
+                            SanPhamId: 0,
+                            SoMetChi: jsonData[i]["Số mét chỉ"],
+                            CachSuDung: jsonData[i]["Cách sử dụng"],
+                            DonVi: jsonData[i]["Đơn vị"],
+                            SoLuong: jsonData[i]["Số lượng"],
+                            DinhMuc: jsonData[i]["Định mức"],
+                            NhuCau: jsonData[i]["Nhu cầu"],
+                            SoLo: jsonData[i]["Số lô"],
+                            NgayVeVIT: jsonData[i]["Ngày về VIT"],
+                            ThucNhan: jsonData[i]["Thực nhận"],
+                            ListSizeMau: "123123",
+                            Co: dangCo,
+                            Cancelled: false,
+                        })
+                    }
+
+                    $('#preloader').fadeOut();
+                }
+
+                reader.readAsBinaryString(file);
+            },
+            Custom: function (event, NlId, index) {
+                if (NlId === null) {
+                    this.checkClick = true;
+                    return "Bạn chưa chọn nguyên liệu!!!";
+                }
+                this.checkClick = false;
+
+                let tenNl = this.DanhSachNguyenLieu.filter(item => item.Id == NlId)[0].Name;
+
+                if (this.items[index].ListSizeMau) {
+                    let saveData = JSON.parse(this.items[index].ListSizeMau);
+                    saveData.forEach(item => {
+                        item.ListCustom = JSON.parse(item.ListCustom)
+                    })
+                    this.TotalKey = saveData;
+                    console.log("saveData", saveData)
+
+                }
+
+                document.getElementById("title_nguyenLieu").innerHTML = tenNl;
+                $("#myModal2").modal("show");
+
+            },
+
+            closeModelChild: function () {
+                $("#myModal2").modal("hide")
+            },
+            ThemCon: function (nlid) {
+                this.TotalKey.push({
+                    ID: 0,
+                    NguyenLieuID: nlid,
+                    ListCustom: [0, 0],
+                    QuantityProduct: 0,
+                    Cancel: false
+                });
+            },
+            deleteList(index) {
+                if (this.TotalKey.filter(item => item.Cancel == false)) {
+                    this.TotalKey[index].Cancel = true
+                }
+                if (this.TotalKey[index].Cancel == true && this.TotalKey[index].ID == 0) {
+                    this.TotalKey.splice(index, 1);
+                }
+            },
+            SaveModelChild() {
+                this.TotalKey.forEach(item => {
+                    item.ListCustom = JSON.stringify(item.ListCustom)
+                })
+                let saveData = JSON.stringify(this.TotalKey)
+                this.items[this.currentIndexDanhSachNguyenLieuNhap].ListSizeMau = saveData;
+                this.TotalKey = [];
+                this.closeModelChild();
+            },
+            autoFill: function (index) {
+                let tp = this.DanhSachNguyenLieu.filter(i => i.Id == this.items[index].NguyenLieuId)[0];
+                console.log(tp);
+                this.items[index].Co = tp.SoLuongDangCo;
+                console.log("this.DanhSachNguyenLieu[index].Co->", this.items[index].Co)
+
+            },
+        },
+
+    });
+
+
+</script>

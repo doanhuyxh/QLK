@@ -1,0 +1,113 @@
+@model AMS.Models.TheoDoiChatLuongViewModel.TheoDoiChatLuongCRUDViewModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+<link rel="stylesheet" href="~/css/views/NguyenLieu/EditNguyenLieu.css" />
+<div id="AppTheoDoiChatLuong" class="view-add-edit view-edit-NguyenLieu">
+    <div class="row">
+        <div class="col-md-12">
+            <form id="frmTheoDoiChatLuong">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="CreatedDate" />
+                <input type="hidden" asp-for="CreatedBy" />
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label asp-for="TenNguyenLieuId" class="control-label"></label>
+                            <select asp-for="TenNguyenLieuId" class="form-control" style="width:100%;">
+                                <option value="0" disabled  >Vui lòng chọn</option>
+                                <option v-for="tp in DanhSachNguyenLieu" v-bind:key="tp.Id" v-bind:value="tp.Id">{{ tp.Name }}</option>
+                            </select>
+                            <span asp-validation-for="TenNguyenLieuId" class="text-danger"></span>
+
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="GhiChuVeChatLuong" class="control-label"></label>
+                            <textarea asp-for="GhiChuVeChatLuong" class="form-control" />
+                            <span asp-validation-for="GhiChuVeChatLuong" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="ChatLuongDrop" class="control-label"></label>
+
+                            <select asp-for="ChatLuongDrop" class="form-control">
+                                <option disabled value="">Chọn đánh giá</option>
+                                <option value="1">Tốt</option>
+                                <option value="2">Khá</option>
+                                <option value="3">Đạt</option>
+                                <option value="4">Không đạt</option>
+                            </select>
+                            <span asp-validation-for="ChatLuongDrop" class="text-danger"></span>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="form-group">
+                    <input type="button" id="btnSave" value="Lưu" onclick="Save()" class="btn btn-info">
+                    <button type="button" id="btnClose" class="btn btn-danger" data-dismiss="modal">Đóng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
+<script type="text/javascript">
+    AppTheoDoiChatLuong = new Vue({
+        el: '#AppTheoDoiChatLuong',
+        mounted() {
+            this.init();
+        },
+        data: {
+            Id: @Html.Raw(@Model.Id),
+            DanhSachNguyenLieu: [],
+            images: new Map(),
+            previewImageThumb: "/images/DefaultAsset/image_thumb.png",
+            previewImage: null
+        },
+        computed: {
+
+
+
+
+        },
+        methods: {
+            fileSelected(evt, previewImage) {
+                evt.preventDefault()
+                const reader = new FileReader();
+                reader.readAsDataURL(evt.target.files[0]);
+                reader.onload = e => {
+                    document.getElementById(previewImage).style.backgroundImage = `url('${e.target.result}')`;
+                };
+                this.images.set(previewImage, evt.target.files[0]);
+            },
+            demo_func: function () {
+
+            },
+            init: function () {
+                fetch("/NguyenLieu/GetIdAndNameNguyenLieuAPI")
+                    .then(res => res.json())
+                    .then(data => this.DanhSachNguyenLieu = data);
+            },
+            makeid: function (length) {
+                let result = '';
+                const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                const charactersLength = characters.length;
+                let counter = 0;
+                while (counter < length) {
+                    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+                    counter += 1;
+                }
+                return result;
+            },
+
+
+
+
+
+
+        }
+    });
+
+
+</script>

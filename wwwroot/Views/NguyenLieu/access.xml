@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<access view="NguyenLieu">
+	<section name="NguyenLieu">
+		<action
+			name="list"
+			description="Xem danh sách"
+			title="Xem danh sách"
+		/>
+		<action
+			name="list_owner"
+			description="Xem danh sách của mình"
+			title="Xem danh sách của mình"
+		/>
+		<action
+			name="create"
+			description="Tạo mới"
+			title="Tạo mới"
+		/>
+
+		<action
+			name="delete"
+			description="Xóa"
+			title="Xóa"
+		/>
+		<action
+			name="delete_owner"
+			description="Xóa của mình"
+			title="Xóa của mình"
+		/>
+
+		<action
+			name="edit"
+			description="Sửa"
+			title="Sửa"
+		/>
+
+		<action
+			name="edit_owner"
+			description="Sửa của mình"
+			title="Sửa của mình"
+		/>
+
+	</section>
+</access>

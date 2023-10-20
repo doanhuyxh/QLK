@@ -1,0 +1,10 @@
+﻿[
+  {
+    "outputFile": "wwwroot/css/views/ViewItemTemplate.css",
+    "inputFile": "wwwroot/css/views/ViewItemTemplate.less"
+  },
+  {
+    "outputFile": "wwwroot/css/custom.css",
+    "inputFile": "wwwroot/css/custom.less"
+  }
+]

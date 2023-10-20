@@ -1,0 +1,53 @@
+﻿@model AMS.Models.QuanLyThanhPhamViewModel.QuanLyThanhPhamCRUDViewModel
+<div cite="view-detail-QuanLyThanhPham">
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-bordered table-striped">
+                <tr>
+                    <th>Ngày tạo</th>
+                    <td>@Model.CreatedDate</td>
+                </tr>
+                <tr>
+                    <th>Ngày cập nhật</th>
+                    <td>@Model.ModifiedDate</td>
+                </tr>
+                <tr>
+                    <th>Người sửa</th>
+                    <td>@Model.CreatedBy</td>
+                </tr>
+                <tr>
+                    <th>Người cập nhật</th>
+                    <td>@Model.ModifiedBy</td>
+                </tr>
+                <tr>
+                    <th>Mã QR  thành phẩm</th>
+                    <td><a id="downloadLink" download="QR.png"> <div id="qrcode"></div></a></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        var baseUrl = window.location.protocol + "//" + window.location.host;
+
+        const qrcode = new QRCode(document.getElementById('qrcode'), {
+            text: `${baseUrl}/QuanLyThanhPham/ChiTiet?id=${@Model.Id}`,
+            width: 128,
+            height: 128,
+            colorDark: '#000',
+            colorLight: '#fff',
+            correctLevel: QRCode.CorrectLevel.H
+        });
+        const downloadLink = document.getElementById('downloadLink');
+        downloadLink.addEventListener('click', function () {
+            const qrcodeCanvas = document.querySelector('#qrcode canvas');
+            const qrCodeDataUrl = qrcodeCanvas.toDataURL('image/png');
+            downloadLink.href = qrCodeDataUrl;
+        });
+    });
+
+
+</script>

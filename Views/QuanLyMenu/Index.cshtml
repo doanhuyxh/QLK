@@ -1,0 +1,238 @@
+<div id="QuanLyMenu" class="wrapper">
+    <div class="panel panel-hash">
+        <div class="panel-heading">
+            <br />
+            <div class="top_content_heading">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="pull-left page-title">
+                            <h3>Quản lý menu</h3>
+                        </div>
+                        <div class="pull-right controlls">
+                            <a href="javascript:void(0)" v-on:click="Resort($event)">
+                                <div class="info-box">
+                                    <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-file"></i></span>
+                                    <div class="info-box-content">
+                                        <span class="info-box-number">
+                                            Resort
+                                        </span>
+                                    </div>
+                                </div>
+                            </a>
+                            <a href="javascript:void(0)" onclick="AddEdit(0)">
+                                <div class="info-box">
+                                    <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-file"></i></span>
+                                    <div class="info-box-content">
+                                        <span class="info-box-number">
+                                            Thêm menu
+                                        </span>
+                                    </div>
+                                </div>
+                            </a>
+                            <a href="javascript:void(0)">
+                                <div class="info-box">
+                                    <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-file"></i></span>
+                                    <div class="info-box-content">
+                                        <span class="info-box-number">
+                                            Xoá menu
+                                        </span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel-body scroll panel-height">
+            <table id="tblQuanLyMenu" class="table table-bordered sorted_table" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th class="nowrap">Name</th>
+                        <th class="nowrap">Sắp xếp</th>
+                        <th>View</th>
+                        <th>Task</th>
+                        <th>Development Environment</th>
+                        <th>Parameter</th>
+                        <th>Description</th>
+                        <th>Created Date</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(menu,index) in listMenu">
+                        <td>{{ menu.Id }}</td>
+                        <td class="nowrap"><div v-html="menu.Name"></div></td>
+                        <td><div class="up-down" style="display:flex; text-align:center"><i v-if="menu.Ordering<menu.TotalItemOfParent" v-on:click="MenuDown($event,menu.Id,menu.Ordering)" style="flex:50%" class="fas fa-long-arrow-alt-down"></i><i v-if="menu.Ordering>1" v-on:click="MenuUp($event,menu.Id,menu.Ordering)" style="flex:50%" class="fas fa-long-arrow-alt-up"></i></div></td>
+                        <td>{{ menu.View }}</td>
+                        <td>{{ menu.Task }}</td>
+                        <td>{{ menu.DevelopmentEnvironment }}</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td><button v-on:click="Edit($event,menu.Id)" class="btn btn-primary">Edit</button></td>
+                        <td><button v-on:click="Delete($event,menu.Id)" class="btn btn-danger">Delete</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .panel-heading {
+        padding: 0px 0px 0px 5px;
+    }
+
+    .panel-body {
+        padding: 5px;
+    }
+
+    .h4 {
+        margin-top: 1px;
+        margin-bottom: 1px;
+    }
+</style>
+<script src="~/js/QuanLyMenu/QuanLyMenu_CRUD.js"></script>
+<script type="text/javascript">
+    QuanLyMenu = new Vue({
+        el: '#QuanLyMenu',
+        mounted() {
+            this.init();
+        },
+        data() {
+            return {
+                images: new Map(),
+                previewImageThumb: "/images/DefaultAsset/image_thumb.png",
+                previewImage: null,
+                listMenu:[]
+            }
+        },
+        computed: {
+
+
+
+
+        },
+        methods: {
+            fileSelected(evt, previewImage) {
+                evt.preventDefault()
+                const reader = new FileReader();
+                reader.readAsDataURL(evt.target.files[0]);
+                reader.onload = e => {
+                    document.getElementById(previewImage).style.backgroundImage = `url('${e.target.result}')`;
+                };
+                this.images.set(previewImage, evt.target.files[0]);
+            },
+            demo_func: function () {
+
+            },
+            init: function () {
+                let currentObj = this;
+                axios.post('/QuanLyMenu/GetDataTabelData')
+                    .then(function (response) {
+                        currentObj.listMenu = response.data.ModelObject;
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+            },
+            makeid: function (length) {
+                let result = '';
+                const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                const charactersLength = characters.length;
+                let counter = 0;
+                while (counter < length) {
+                    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+                    counter += 1;
+                }
+                return result;
+            },
+            Delete:function(event,Id){
+                Swal.fire({
+                    title: 'Bạn có chắc chắn muốn xóa?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes'
+                }).then((result) => {
+                    if (result.value) {
+                        $.ajax({
+                            type: "POST",
+                            url: "/QuanLyMenu/Delete?id=" + Id,
+                            success: function (result) {
+                                var message = "Xóa thành công. Menu ID: " + result.Id;
+                                Swal.fire({
+                                    title: message,
+                                    icon: 'info',
+                                    onAfterClose: () => {
+                                        
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            },
+            Edit:function(event,Id){
+                var url = "/QuanLyMenu/AddEdit?id=" + Id;
+                if (Id > 0) {
+                    $('#titleBigModal').html("Chỉnh sửa menu");
+                }
+                else {
+                    $('#titleBigModal').html("Thêm một menu");
+                }
+                loadBigModal(url);
+            },
+            MenuDown: function (event, Id, ordering) {
+                let currentObj = this;
+                axios.get(`/QuanLyMenu/MenuDown?Id=${Id}&ordering=${ordering}`, {
+                }).then(function (response) {
+                        currentObj.listMenu = response.data.ModelObject;
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+            },
+            MenuUp: function (event, Id, ordering) {
+                let currentObj = this;
+                if (ordering==1){
+                    return;
+                }
+                axios.get(`/QuanLyMenu/MenuUp?Id=${Id}&ordering=${ordering}`, {
+                    Id: Id
+                }).then(function (response) {
+                    currentObj.listMenu = response.data.ModelObject;
+                })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+            },
+            Resort: function (event, Id) {
+                let currentObj = this;
+                axios.get('/QuanLyMenu/Resort').then(function (response) {
+                    currentObj.listMenu = response.data.ModelObject;
+                })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+            },
+            Reload:function(){
+                let currentObj = this;
+                axios.post('/QuanLyMenu/GetDataTabelData')
+                    .then(function (response) {
+                        currentObj.listMenu = response.data.ModelObject;
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+            }
+
+        }
+    });
+
+
+</script>

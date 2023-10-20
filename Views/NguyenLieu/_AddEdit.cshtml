@@ -1,0 +1,421 @@
+@model AMS.Models.NguyenLieuViewModel.NguyenLieuCRUDViewModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+<style>
+    .mr-2 {
+        margin-right: 8px;
+    }
+</style>
+<link rel="stylesheet" href="~/css/views/NguyenLieu/EditNguyenLieu.css" />
+<div id="AppNguyenLieu" class="view-add-edit view-edit-NguyenLieu">
+    <div class="row">
+        <div class="col-md-12">
+            <form id="frmNguyenLieu">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="CreatedDate" />
+                <input type="hidden" asp-for="CreatedBy" />
+                <input type="hidden" asp-for="SoLuongLyThuyet" />
+                <input type="hidden" asp-for="SoLuong" />
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label asp-for="MaNguyenLieu" class="control-label"></label>
+                            <input asp-for="MaNguyenLieu" v-model="MaNguyenLieu" class="form-control" />
+                            <div class="alert alert-danger text-center" v-if="checkDuplicate">
+                                Đã tồn tại mã nguyên liệu
+                            </div>
+                            <span asp-validation-for="MaNguyenLieu" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="TenNguyenLieu" class="control-label"></label>
+                            <input asp-for="TenNguyenLieu" v-model="TenNguyenLieu" class="form-control" />
+                            <span asp-validation-for="TenNguyenLieu" class="text-danger"></span>
+                            <div class="alert alert-danger text-center" v-if="checkDuplicateTen">
+                                Đã tồn tại tên nguyên liệu
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="DonViTinh" class="control-label"></label>
+                            <input asp-for="DonViTinh" class="form-control" />
+                            <span asp-validation-for="DonViTinh" class="text-danger"></span>
+                        </div>
+                        <div class="form-group row">
+                            <label asp-for="KhoId" class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <select asp-for="KhoId" asp-items="@ViewBag._LoadKhoXuongThucTe"
+                                        id="KhoId" class="form-control" style="width:100%;">
+                                    <option disabled selected>--- Vui lòng chọn ---</option>
+                                </select>
+                                <span asp-validation-for="KhoId" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-primary" v-on:click="ThemMoi()">Thêm chi tiết</button>
+
+                        @*  <div class="d-flex justify-content-center mb-3">
+
+                        <div>
+                        <span v-if="checkTong" class="alert alert-danger text-center">Không đủ số lượng vui lòng kiểm tra</span>
+
+                        </div>
+                        </div>*@
+
+                        <div class="form-group">
+                            <table class="table table-bordered" v-show="AddMore">
+                                <thead>
+                                    <tr>
+                                        <th>
+
+                                        </th>
+
+                                        <th>
+
+                                            Màu sắc
+                                        </th>
+                                        <th>
+
+                                            Kích cỡ(Size)
+                                        </th>
+
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <tr v-for="(itemss,index) in backupItem" :key="index">
+                                        <td>
+                                            <button type="button" class="btn btn-danger" v-on:click="deleteList(index)">Xóa</button>
+
+                                        </td>
+
+                                        <td>
+                                            <select v-if="!customCheck" v-model="itemss.ListCustom[0]" class="form-control">
+                                                <option v-for="nl in MaMau" v-bind:key="nl.ID" v-bind:value="nl.ID">{{ nl.CustomFieldValue }}</option>
+                                            </select>
+                                            <input v-else v-model="itemss.CustomFieldValueMau" class="form-control" placeholder="Nhập màu....." />
+                                            <div class="d-flex justify-content-center mt-2">
+                                                <button v-if="!customCheck" type="button" class="btn btn-warning" v-on:click="addItemCustom()">+</button>
+                                                <button v-if="customCheck" type="button" class="btn btn-warning" v-on:click="cancelItemCusstom()" style="margin-right:8px">x</button>
+                                                <button v-if="customCheck" type="button" class="btn btn-success" v-on:click="SaveItemCusstom($event, 1, itemss.CustomFieldValueMau,index)">Lưu</button>
+                                            </div>
+                                            <span v-if="checkDuplicateMau" class="text-danger">Đã có mã màu trong bảng</span>
+
+
+                                        </td>
+                                        <td>
+                                            <select v-if="!customCheckSize" v-model="itemss.ListCustom[1]" class="form-control">
+                                                <option v-for="nl in Size" v-bind:key="nl.ID" v-bind:value="nl.ID">{{ nl.CustomFieldValue }}</option>
+                                            </select>
+                                            <input v-else v-model="itemss.CustomFieldValueSize" class="form-control" placeholder="Nhập size....." />
+                                            <div class="d-flex justify-content-center mt-2">
+                                                <button v-if="!customCheckSize" type="button" class="btn btn-warning" v-on:click="addItemCustomSize()">+</button>
+                                                <button v-if="customCheckSize" type="button" class="btn btn-warning" v-on:click="cancelItemCusstomSize()" style="margin-right:8px">x</button>
+                                                <button v-if="customCheckSize" type="button" class="btn btn-success" v-on:click="SaveItemCusstom($event, 2, itemss.CustomFieldValueSize,index)">Lưu</button>
+
+                                            </div>
+                                            <span v-if="checkDuplicateSize" class="text-danger">Đã có mã size trong bảng</span>
+
+                                        </td>
+
+
+                                    </tr>
+
+                                </tbody>
+                                <tfoot>
+                                <td>
+                                    <button class="btn btn-warning" type="button" v-on:click="addColToItem">Thêm</button>
+                                </td>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="form-group">
+                    <input type="button" id="btnSave" value="Lưu" :disabled="checkDuplicate || checkDuplicateTen" onclick="Save()" class="btn btn-info">
+                    <button type="button" id="btnClose" class="btn btn-danger" data-dismiss="modal">Đóng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
+<script type="text/javascript">
+    AppNguyenLieu = new Vue({
+        el: '#AppNguyenLieu',
+
+        data: {
+            Id: @Html.Raw(@Model.Id),
+            MaNguyenLieu: "@Html.Raw(@Model.MaNguyenLieu)",
+            TenNguyenLieu: "@Html.Raw(@Model.TenNguyenLieu)",
+            SoLuong: "@Html.Raw(@Model.SoLuong)",
+            images: new Map(),
+            previewImageThumb: "/images/DefaultAsset/image_thumb.png",
+            previewImage: null,
+            AddMore: false,
+            items: [],
+            valueKey: [],
+            TotalKey: [],
+            check: "",
+            customCheck: false,
+            customCheckSize: false,
+            clickCount: 0,
+            checkDuplicateMau: false,
+            checkDuplicateSize: false,
+            MauEdit: "",
+            SizeEdit: "",
+            DanhSachNguyenLieu: [],
+
+        },
+        mounted() {
+            fetch("/NguyenLieu/GetApiCustomfield")
+                .then(res => res.json())
+                .then(data => this.items = data);
+            fetch("/NguyenLieu/GetNguyenLieuAPI")
+                .then(res => res.json())
+                .then(data => this.DanhSachNguyenLieu = data);
+            fetch("/NguyenLieu/GetApiCustomfieldValue")
+                .then(res => res.json())
+                .then(data => {
+                    this.valueKey = data;
+                    this.MaMau = data.filter(item => item.CustomFieldKey === 1);
+                    this.MaMau = this.MaMau.map(item => ({ ...item, ID: item.ID }));
+                    this.Size = data.filter(itemSize => itemSize.CustomFieldKey === 2);
+                    this.Size = this.Size.map(itemSize => ({ ...itemSize, ID: itemSize.ID }));
+                    console.log('this.MaMau', this.MaMau);
+                    console.log('this.Size', this.Size);
+
+
+                })
+            fetch("/NguyenLieu/GetApiCustomfieldValueTotal?nguyenlieuId=" + this.Id)
+                .then(res => res.json())
+                .then(data => {
+                    console.log("ada", data)
+                    data.forEach(item => {
+
+                        item.ListCustom = JSON.parse(item.ListCustom)
+                    })
+                    this.TotalKey = data
+                })
+        },
+        computed: {
+            MaMau() {
+                return this.valueKey.filter(item => item.CustomFieldKey === 1)
+            },
+            Size() {
+                return this.valueKey.filter(item => item.CustomFieldKey === 2)
+            },
+
+            backupItem: function () {
+                return this.TotalKey.filter(item => item.Cancel == false)
+            },
+            isNotEqual() {
+                return this.items.some(item => item.QuantityProduct !== this.SoLuong);
+            },
+            checkDuplicate() {
+                const duplicate = this.DanhSachNguyenLieu.some((item, index) => {
+                    // Kiểm tra trùng mã nguyên liệu
+                    if (item.MaNguyenLieu === this.MaNguyenLieu && index !== this.index) {
+                        return true;
+                    }
+                    return false;
+                });
+                return duplicate;
+            },
+            checkDuplicateTen() {
+                const duplicate = this.DanhSachNguyenLieu.some((item, index) => {
+                    // Kiểm tra trùng mã nguyên liệu
+                    if (item.TenNguyenLieu === this.TenNguyenLieu && index !== this.index) {
+                        return true;
+                    }
+                    return false;
+                });
+                return duplicate;
+            }
+
+
+            //checkTong() {
+            //    if (this.backupItem.length === 0) {
+            //        return false;
+            //    }
+            //    let tong = this.backupItem.reduce((accumulator, currentValue) => parseInt(accumulator) + parseInt(currentValue.QuantityProduct), 0);
+            //    if (tong == this.SoLuong) {
+            //        return false;
+            //    }
+            //    else {
+            //        return true;
+            //    }
+
+            //}
+
+        },
+
+        watch: {
+            check(newVal) {
+                console.log(newVal);
+            }
+        },
+        methods: {
+            deleteList(index) {
+                if (this.TotalKey.filter(item => item.Cancel == false)) {
+                    this.TotalKey[index].Cancel = true
+                }
+                if (this.TotalKey[index].Cancel == true && this.TotalKey[index].ID == 0) {
+                    this.TotalKey.splice(index, 1);
+                }
+
+            },
+            addItemCustom() {
+                this.customCheck = true;
+            },
+
+            cancelItemCusstom() {
+                this.customCheck = false;
+                this.checkDuplicateMau = false;
+                this.checkDuplicateSize = false;
+            },
+            addItemCustomSize() {
+                this.customCheckSize = true;
+            },
+
+            cancelItemCusstomSize() {
+                this.customCheckSize = false;
+                this.checkDuplicateMau = false;
+                this.checkDuplicateSize = false;
+            },
+            checkC() {
+                console.log(this.check);
+            },
+            handleChange(event) {
+                this.check = event.target.innerText;
+            },
+            fileSelected(evt, previewImage) {
+                evt.preventDefault()
+                const reader = new FileReader();
+                reader.readAsDataURL(evt.target.files[0]);
+                reader.onload = e => {
+                    document.getElementById(previewImage).style.backgroundImage = `url('${e.target.result}')`;
+                };
+                this.images.set(previewImage, evt.target.files[0]);
+            },
+            CallData() {
+                fetch("/NguyenLieu/GetApiCustomfield")
+                    .then(res => res.json())
+                    .then(data => this.items = data);
+                fetch("/NguyenLieu/GetApiCustomfieldValue")
+                    .then(res => res.json())
+                    .then(data => { this.valueKey = data })
+                fetch("/NguyenLieu/GetApiCustomfieldValueTotal")
+                    .then(res => res.json())
+                    .then(data => { this.TotalKey = data })
+            },
+            demo_func: function () {
+
+            },
+            init: function () {
+                this.CallData();
+            },
+            makeid: function (length) {
+                let result = '';
+                const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                const charactersLength = characters.length;
+                let counter = 0;
+                while (counter < length) {
+                    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+                    counter += 1;
+                }
+                return result;
+            },
+            ThemMoi() {
+                this.AddMore = true;
+                console.log('this.Id', this.Id)
+                if (this.Id == 0) {
+                    this.TotalKey.push({
+                        ID: 0,
+                        NguyenLieuID: 0,
+                        ListCustom: [0, 0],
+                        QuantityProduct: 0,
+                        Cancel: false
+
+                    });
+                }
+            },
+            addItem() {
+                this.items.push({
+                    NameField: "",
+                });
+            },
+            addColToItem() {
+                this.TotalKey.push({
+                    ID: 0,
+                    NguyenLieuID: 0,
+                    ListCustom: [0, 0],
+                    QuantityProduct: 0,
+                    Cancel: false
+                });
+            },
+            Xoa(index) {
+                this.items.splice(index, 1)
+            },
+            ChangeListCutomID(customvalue, index) {
+                this.TotalKey[index].ListCustom[0] = customvalue
+            },
+            ChangeListCutomID2(customvalue, index) {
+                this.TotalKey[index].ListCustom[1] = customvalue
+            },
+
+            SaveItemCusstom(event, CustomFieldKey, CustomFieldValue, index) {
+                let cus = this;
+                let duplicateItem = cus.valueKey.find(item => item.CustomFieldKey === 1 && item.CustomFieldValue.toLowerCase() === CustomFieldValue.toLowerCase());
+                let duplicateItemSize = cus.valueKey.find(item => item.CustomFieldKey === 2 && item.CustomFieldValue.toLowerCase() === CustomFieldValue.toLowerCase());
+
+                if (duplicateItem) {
+                    this.checkDuplicateMau = true;
+                    console.log("Giá trị đã tồn tại trong dữ liệu.");
+                    return;
+                }
+                if (duplicateItemSize) {
+                    this.checkDuplicateSize = true;
+                    console.log("Giá trị đã tồn tại trong dữ liệu.");
+                    return;
+                }
+
+
+                let data = new FormData();
+                data.append("Id", 0)
+                data.append("CustomFieldKey", CustomFieldKey)
+                data.append("CustomFieldValue", CustomFieldValue)
+
+                fetch("/NguyenLieu/AddCustom", {
+                    method: "POST",
+                    headers: {
+                        processData: false,
+                        contentType: false,
+                    },
+                    body: data
+                }).
+                    then(res => res.json())
+                    .then(data => {
+                        let curent = this;
+                        cus.valueKey.push({
+                            "ID": data.ID, "CustomFieldKey": data.CustomFieldKey, "CustomFieldValue": data.CustomFieldValue
+                        })
+                        cus.customCheck = false;
+                        cus.checkDuplicateMau = false;
+                        cus.checkDuplicateSize = false;
+                        if (data.CustomFieldKey == 1) {
+                            cus.TotalKey[index].ListCustom[0] = data.ID;
+                        } else {
+                            cus.TotalKey[index].ListCustom[1] = data.ID;
+                        }
+                        curent.MauEdit = cus.TotalKey[index].ListCustom[0];
+                        curent.SizeEdit = cus.TotalKey[index].ListCustom[1];
+                    });
+            }
+
+        }
+    });
+
+
+</script>

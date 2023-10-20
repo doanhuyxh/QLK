@@ -1,0 +1,508 @@
+@model AMS.Models.XayDungCongThucViewModel.XayDungCongThucCRUDViewModels
+
+@{
+    ViewData["Title"] = "Create";
+}
+<style>
+    .modal-dialog.modal-lg {
+        max-width: 80em;
+    }
+</style>
+
+<div id="AppThanhPham" class="view-add-edit">
+    <div class="row">
+        <div class="col-md-12">
+            <form id="frmSanPham">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" id="Id" />
+                <input type="hidden" asp-for="CreatedDate" id="CreatedDate" />
+                <input type="hidden" asp-for="CreatedBy" id="CreatedBy" />
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label asp-for="Name" class="control-label"></label>
+                            <input asp-for="Name" class="form-control" id="Name" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Description" class="control-label"></label>
+                            <input asp-for="Description" class="form-control" id="Description" />
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="MaSP" class="control-label"></label>
+                            <input asp-for="MaSP" class="form-control" id="MaSP" />
+                            <span asp-validation-for="MaSP" class="text-danger"></span>
+                        </div>
+                        <div class="row">
+                            <a href="javascript:void(0)" v-on:click="download">
+                                <img id="image" />
+                            </a>
+                        </div>
+                        <div class="row">
+                            <h3 class="col-12 m-1 text-lg-center text-danger">Nguyên liệu cần thiết để xây dựng thành phẩm</h3>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">NO</th>
+                                        <th scope="col" style="width: 12em;">Miêu tả</th>
+                                        <th scope="col" style="width: 12em;">Tên nguyên liệu</th>
+                                        <th scope="col" style="width: 8em;">Số mét chỉ</th>
+                                        <th scope="col" style="width: 12em;">Cách sử dụng</th>
+                                        <th scope="col" style="width: 5em;">Đơn vị </th>
+                                        <th scope="col" style="width: 8em;">Số lượng</th>
+                                        <th scope="col" style="width: 8em;">Định mức</th>
+                                        <th scope="col" style="width: 8em;">Nhu cầu</th>
+                                        <th scope="col" style="width: 7em;">Số lô</th>
+                                        <th scope="col" class="text-nowrap">Ngày về VIT</th>
+                                        <th scope="col" style="width: 7em;">Thực nhận</th>
+                                        <th scope="col"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(item,index) in backupitem">
+                                        <td scope="row">{{index+1}}</td>
+                                        <td scope="row">
+                                            <input v-model="item.MieuTa" class="form-control" />
+                                        </td>
+                                        <td scope="row">
+                                            <select v-model="item.NguyenLieuId" class="form-control" ref="selectRef">
+                                                <option disabled value="">Chọn nguyên liệu</option>
+                                                <option v-for="nl in NguyenLieu" v-bind:key="nl.Id" v-bind:value="nl.Id">{{ nl.TenNguyenLieu }}</option>
+                                                <div v-if="item.NguyenLieuId === null" class="alert alert-danger">Vui lòng chọn nguyên liệu</div>
+                                            </select>
+                                        </td>
+                                        <td scope="row">
+                                            <input v-model="item.SoMetChi" class="form-control" />
+                                        </td>
+                                        <td scope="row">
+                                            <textarea v-model="item.CachSuDung" class="form-control" />
+                                        </td>
+                                        <td scope="row">
+                                            <input v-model="item.DonVi" class="form-control" />
+                                        </td>
+                                        <td scope="row">
+                                            <input v-model="item.SoLuong" type="number" class="form-control" />
+                                            <div v-if="item.SoLuong == 0" class="alert alert-danger">Vui lòng nhập số lượng</div>
+                                        </td>
+                                        <td scope="row"><input v-model="item.DinhMuc" type="text" class="form-control" /></td>
+                                        <td scope="row">
+                                            <input :value ="nhuCauComputed(item)" v-on:input="updateNhuCau(item, $event.target.value)" type="text" class="form-control" readonly />
+                                        </td>
+                                        <td scope="row"><input v-model="item.SoLo" type="text" class="form-control" /></td>
+
+                                        <td scope="row"><input v-model="item.NgayVeVIT" type="date" class="form-control" /></td>
+                                        <td scope="row"><input v-model="item.ThucNhan" type="text" class="form-control" /></td>
+                                        <td scope="row">
+                                            <button class="btn btn-secondary m-1" type="button" v-on:click="Custom($event,item.NguyenLieuId, index)">Chi Tiết</button>
+                                            <div v-if="checkClick" class="alert alert-danger">Vui lòng chọn nguyên liệu</div>
+
+                                            <button class="btn btn-warning" type="button" v-on:click="Xoa(index)">Xoá</button>
+
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="12" class="text-center text-danger">{{DuplicakeMessage}}</td>
+                                        <td><button type="button" :disabled="checkDuplicate" class="btn btn-primary" v-on:click="ThemMoi()">Thêm</button></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <input type="button" id="btnSave" :disabled="checkDuplicate" value="Lưu" onclick="Save()" class="btn btn-info">
+                    <button type="button" id="btnClose" class="btn btn-danger" data-dismiss="modal">Đóng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="modal" id="myModal2" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="title_nguyenLieu"></h4>
+                </div><div class="container"></div>
+                <div class="modal-body">
+                    <table class="table table-responstive">
+                        <thead>
+                            <tr>
+                                <th v-for="(item, index) in customfile">
+                                    <p>{{item.FieldName}}</p>
+                                </th>
+                                <th>Số lượng</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(itemss,index) in TotalKey" :key="index">
+                                <td>
+                                    <select v-model="itemss.ListCustom[0]" class="form-control">
+                                        <option v-for="nl in MaMau" v-bind:key="nl.ID" v-bind:value="nl.ID">{{ nl.CustomFieldValue }}</option>
+                                    </select>
+                                </td>
+
+                                <td>
+                                    <select v-model="itemss.ListCustom[1]" class="form-control">
+                                        <option v-for="nl in Size" v-bind:key="nl.ID" v-bind:value="nl.ID">{{ nl.CustomFieldValue }}</option>
+                                    </select>
+                                </td>
+
+                                <td>
+                                    <input type="text" v-model="itemss.QuantityProduct" class="form-control" />
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-danger" v-on:click="deleteList(index)">Xóa</button>
+                                </td>
+                            </tr>
+                        </tbody>
+
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" v-on:click="SaveModelChild()">Lưu</button>
+                    <button type="button" class="btn btn-danger" v-on:click="closeModelChild()">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/jsbarcode/3.6.0/JsBarcode.all.min.js"></script>
+
+<script src="/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
+<script type="text/javascript">
+    var AppThanhPham = new Vue({
+        el: '#AppThanhPham',
+        mounted() {
+            this.init();
+        },
+        beforeDestroy() {
+            this.$nextTick(() => {
+                const selectElement = this.$refs.selectRef;
+                if (selectElement) {
+                    selectElement.removeEventListener('change', this.checkNguyenLieuId);
+                }
+            });
+        },
+        data: {
+            items: @Html.Raw(ViewBag._LoadNguyenLieu),
+            NguyenLieu: [],
+            url: "/images/DefaultAsset/image_thumb.png",
+            showImgOld: false,
+            DuplicakeMessage: "",
+            CongThuc: false,
+            selectedValues: [],
+            backupItem2: [],
+            customfile: [],
+            custinfileValue: [],
+            TotalKey: [],
+            currentNguyenLieu: 0,
+            currentIndexDanhSachNguyenLieuNhap: 0,
+            checkClick: false,
+
+        },
+        methods: {
+            PhuongThucNhap: function (TrangThai) {
+                if (TrangThai == 2) {
+                    this.CongThuc = true;
+                }
+                else {
+                    this.CongThuc = false;
+                }
+            },
+            TheoCongThuc() {
+                this.CongThuc = true;
+            },
+
+            onFileChange: function (e) {
+                const file = e.target.files[0];
+                this.url = URL.createObjectURL(file);
+            },
+            generateBarcode(barcodeText) {
+
+                JsBarcode("#barcode", barcodeText, {
+                    text: barcodeText,
+                    width: 2,
+                    height: 50,
+                    fontSize: 15,
+                });
+
+                var svg = $("#barcode")[0];
+
+                var xml = new XMLSerializer().serializeToString(svg);
+
+                var base64 = 'data:image/svg+xml;base64,' + btoa(xml);
+
+                var img = $("#image")[0];
+
+                img.src = base64;
+                //document.getElementById("ad").setAttribute("href", base64);
+
+            },
+            download: function () {
+                img = new Image(),
+                    serializer = new XMLSerializer(),
+                    svgStr = serializer.serializeToString(document.getElementById('barcode'));
+
+                img.src = 'data:image/svg+xml;base64,' + window.btoa(svgStr);
+
+                // You could also use the actual string without base64 encoding it:
+                //img.src = "data:image/svg+xml;utf8," + svgStr;
+
+                var canvas = document.createElement("canvas");
+
+                var w = 800;
+                var h = 400;
+
+                canvas.width = w;
+                canvas.height = h;
+                canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+
+                var imgURL = canvas.toDataURL("image/png");
+
+
+                var dlLink = document.createElement('a');
+                dlLink.download = "Barchode";
+                dlLink.href = imgURL;
+                dlLink.dataset.downloadurl = ["image/png", dlLink.download, dlLink.href].join(':');
+
+                document.body.appendChild(dlLink);
+                dlLink.click();
+                document.body.removeChild(dlLink);
+            },
+
+            CallData: function () {
+                fetch("/NguyenLieu/GetNguyenLieuAPI").
+                    then((res) => res.json())
+                    .then((data) => {
+                        this.NguyenLieu = data;
+                    });
+                fetch("/NguyenLieu/GetIdAndNameNguyenLieuAPI")
+                    .then(res => res.json())
+                    .then(data => { this.DanhSachNguyenLieu = data; });
+
+                fetch("/NguyenLieu/GetApiCustomfield").then(res => res.json()).then(data => { this.customfile = data })
+
+                fetch("/NguyenLieu/GetApiCustomfieldValue").then(res => res.json()).then(data => { this.custinfileValue = data })
+
+
+            },
+            Xoa: function (index) {
+                if (this.items.filter(item => item.Cancelled == false).length > 1) {
+                    this.items[index].Cancelled = true
+                }
+                if (this.items[index].Cancelled == true && this.items[index].Id == 0) {
+                    this.items.splice(index, 1);
+                }
+            },
+            ThemMoi: function () {
+                this.items.push({
+                    Id: 0,
+                    MieuTa: "",
+                    NguyenLieuId: null,
+                    SanPhamId: 0,
+                    SoMetChi: 0,
+                    CachSuDung: "",
+                    DonVi: "",
+                    SoLuong: 0,
+                    DinhMuc: "",
+                    NhuCau: "",
+                    SoLo: "",
+                    NgayVeVIT: "",
+                    ThucNhan: "",
+                    ListSizeMau: "",
+                    Cancelled: false,
+                })
+            },
+
+
+            filterNhaCungCap: function (e, index, idNL) {
+
+                //this.items[index].DonViId = nl.DonViId;
+
+            },
+
+            onInputChange: function (e, index, idNL, IdDonVi) {
+                this.filterNhaCungCap(e, index, idNL);
+                this.filterDonVi(e, index, IdDonVi);
+            },
+
+            ImgKhoiTao: function () {
+                let st = document.getElementById("Id").value;
+                if (st != 0) {
+                    this.showImgOld = true;
+                }
+            },
+            init: function () {
+                this.CallData();
+                this.ImgKhoiTao();
+                this.$nextTick(() => {
+                    const selectElement = this.$refs.selectRef;
+                    if (selectElement) {
+                        selectElement.addEventListener('change', this.checkNguyenLieuId);
+                    }
+                });
+            },
+            Custom: function (event, NlId, index) {
+                if (NlId === null) {
+                    this.checkClick = true;
+                    return "Bạn chưa chọn nguyên liệu!!!";
+                }
+                this.checkClick = false;
+
+                let tenNl = this.NguyenLieu.filter(item => item.Id == NlId)[0].TenNguyenLieu;
+
+                fetch("/NguyenLieu/GetApiCustomfieldValueTotal?nguyenlieuId=" + NlId)
+                    .then(res => res.json())
+                    .then(data => {
+                        console.log("ada", data)
+                        data.forEach(item => {
+
+                            item.ListCustom = JSON.parse(item.ListCustom)
+                        })
+                        this.TotalKey = data;
+                        this.currentNguyenLieu = NlId;
+                        this.currentIndexDanhSachNguyenLieuNhap = index;
+
+
+                        if (this.TotalKey.ListCustom) {
+                            let saveData = JSON.parse(this.TotalKey.ListCustom);
+                            saveData.forEach(item => {
+                                item.ListCustom = JSON.parse(item.ListCustom)
+                            })
+                            this.TotalKey = saveData;
+                            console.log(saveData)
+                        };
+
+                        $("#myModal2").modal("show");
+                        document.getElementById("title_nguyenLieu").innerHTML = tenNl;
+                    })
+
+            },
+            closeModelChild: function () {
+
+                $("#myModal2").modal("hide")
+            },
+            ThemCon: function (nlid) {
+                this.TotalKey.push({
+                    ID: 0,
+                    NguyenLieuID: nlid,
+                    ListCustom: [0, 0],
+                    QuantityProduct: 0,
+                    Cancel: false
+                });
+
+            },
+            deleteList(index) {
+                if (this.TotalKey.filter(item => item.Cancel == false)) {
+                    this.TotalKey[index].Cancel = true
+                }
+                if (this.TotalKey[index].Cancel == true && this.TotalKey[index].ID == 0) {
+                    this.TotalKey.splice(index, 1);
+                }
+            },
+            SaveModelChild() {
+                this.TotalKey.forEach(item => {
+                    item.ListCustom = JSON.stringify(item.ListCustom)
+                })
+                let saveData = JSON.stringify(this.TotalKey)
+                this.items[this.currentIndexDanhSachNguyenLieuNhap].ListSizeMau = saveData;
+                this.TotalKey = [];
+                this.closeModelChild();
+            },
+            checkNguyenLieuId(event) {
+                const selectedValue = event.target.value;
+                if (selectedValue !== '') {
+                    this.checkClick = false;
+
+                }
+            },
+            updateNhuCau(item, newValue) {
+                const parsedValue = parseFloat(newValue);
+                if (!isNaN(parsedValue)) {
+                    item.NhuCau = parsedValue;
+                }
+            }
+        },
+        computed: {
+            nhuCauComputed() {
+                return item => item.DinhMuc * item.SoLuong;
+            },
+            MaMau() {
+                return this.custinfileValue.filter(item => item.CustomFieldKey == 1);
+            },
+            Size() {
+                return this.custinfileValue.filter(item => item.CustomFieldKey == 2);
+            },
+            backupItem2: function () {
+                return this.TotalKey.filter(item => item.Cancel == false)
+            },
+            backupitem: function () {
+                return this.items.filter(item => item.Cancelled == false)
+            },
+            backupItem1: function () {
+                return this.backupItem2
+            },
+            checkDuplicate: function () {
+                let duplicates = [];
+                for (let i = 0; i < this.backupitem.length; i++) {
+                    for (let j = i + 1; j < this.backupitem.length; j++) {
+                        if ((this.backupitem[i].NguyenLieuId == this.backupitem[j].NguyenLieuId)) {
+                            duplicates.push(this.backupitem[i]);
+                            duplicates.push(this.backupitem[j]);
+                        }
+                    }
+                }
+
+                if (duplicates.length > 1) {
+                    this.DuplicakeMessage = `Nguyên liệu bị trùng lặp`;
+                    return true;
+                }
+                else {
+                    this.DuplicakeMessage = "";
+                    return false;
+                }
+            },
+            getCustomOptions() {
+                return function (selectedID) {
+                    // Trả về danh sách các tùy chọn dựa trên selectedID
+                    const item = this.backupItem1.find(total => total.ListCustom[0] === selectedID);
+                    if (item) {
+                        return item.MaMau;
+                    }
+                    return [];
+                };
+            },
+            getCustomFieldValue() {
+                return function (selectedID, customFieldKey) {
+                    // Trả về giá trị của custom field dựa trên selectedID và customFieldKey
+                    const item = this.backupItem1.find(total => total.ListCustom[0] === selectedID);
+                    if (item) {
+                        const customField = item.MaMau.find(nl => nl.ID === selectedID && nl.CustomFieldKey === customFieldKey);
+                        if (customField) {
+                            return customField.CustomFieldValue;
+                        }
+                    }
+                    return '';
+                };
+            },
+
+        },
+
+        watch: {
+            barcodeText(newValue) {
+                this.generateBarcode(newValue);
+            },
+            'item.NguyenLieuId': function (newVal) {
+                if (newVal != null) {
+                    this.checkClick = false;
+                }
+            }
+        },
+    });
+</script>

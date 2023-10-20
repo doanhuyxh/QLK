@@ -1,0 +1,71 @@
+<div class="wrapper">
+    <div class="panel panel-hash">
+        <div class="panel-heading">
+            <br />
+            <div class="top_content_heading">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="pull-left page-title">
+                            <h3>Quản lý phông lưu trữ</h3>
+                        </div>
+                        <div class="pull-right controlls">
+                            <a href="javascript:void(0)" onclick="AddEdit(0)">
+                                <div class="info-box">
+                                    <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-file"></i></span>
+                                    <div class="info-box-content">
+                                        <span class="info-box-number">
+                                            Thêm phông lưu trữ
+                                        </span>
+                                    </div>
+                                </div>
+                            </a>
+                            <a href="javascript:void(0)">
+                                <div class="info-box">
+                                    <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-file"></i></span>
+                                    <div class="info-box-content">
+                                        <span class="info-box-number">
+                                            Xoá phông lưu trữ
+                                        </span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-body scroll panel-height">
+            <table id="tblDisplayFieldOfTable" class="table table-bordered table-striped" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Tên trường</th>
+<th>Mô tả</th>
+                        <th>Created Date</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .panel-heading {
+        padding: 0px 0px 0px 5px;
+    }
+
+    .panel-body {
+        padding: 5px;
+    }
+
+    .h4 {
+        margin-top: 1px;
+        margin-bottom: 1px;
+    }
+</style>
+
+<script src="~/js/DisplayFieldOfTable/DisplayFieldOfTable_CRUD.js"></script>
+<script src="~/js/DisplayFieldOfTable/DisplayFieldOfTable_Datatable.js"></script>

@@ -1,0 +1,79 @@
+﻿@{
+    ViewData["Title"] = "Manage User";
+}
+
+<div class="wrapper">
+    <div class="panel panel-hash">
+        <div class="panel-heading">
+            <div class="top_content_heading">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="pull-left page-title">
+                            <h3>Quản lý người dùng</h3>
+                        </div>
+                        <div class="pull-right controlls">
+                            <a href="javascript:void(0)" onclick="AddEditUserAccount(0)">
+                                <div class="info-box">
+                                    <span class="info-box-icon bg-success elevation-1"><i class="fas fa-plus-square"></i></span>
+                                    <div class="info-box-content">
+                                        <span class="info-box-number">
+                                            Thêm mới
+                                        </span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel-body scroll panel-height">
+            <table id="tblUserAccount" class="table table-bordered table-striped" style="width:100%">
+                <thead class="bg-secondary">
+                    <tr>
+                        <th>Id</th>
+                        <th>Ảnh đại diện</th>
+                        <th>Họ</th>
+                        <th>Tên</th>
+                        <th>Số điện thoại</th>
+                        <th>Email</th>
+                        <th>Nhóm người dùng</th>
+                        <th>Ngày tạo</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .panel-heading {
+        padding: 0px 0px 0px 5px;
+    }
+
+    .panel-body {
+        padding: 5px;
+    }
+
+    .h4 {
+        margin-top: 1px;
+        margin-bottom: 1px;
+    }
+
+    img {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 5px;
+        width: 50px;
+    }
+
+        img:hover {
+            box-shadow: 0 0 2px 1px rgba(0, 140, 186, 0.5);
+        }
+</style>
+
+
+<script src="~/js/UserManagement/UserManagement_CRUD.js"></script>
+<script src="~/js/UserManagement/UserManagement_Datatable.js"></script>
+

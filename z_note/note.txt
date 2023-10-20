@@ -1,0 +1,10 @@
+﻿http://hoso.368up.com
+admin/ 123456
+https://edoc.dasvision.vn/
+
+
+git rm --cached `git ls-files -i -c -X .gitignore`
+git ls-files -i -c -X .gitignore
+git rm -r -f --cached .
+
+"AppDevPath": "C:\\Users\\Admin\\Source\\Repos\\QLKHO", thêm đoạn này vào. Đường dẫn sẽ là full path trong máy mọi người

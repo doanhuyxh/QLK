@@ -1,0 +1,101 @@
+﻿@{
+    Layout = null;
+    int resul = 0;
+    int total = 0;
+    int count = 0;
+}
+
+<!doctype html>
+<html lang="vn">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Phiếu Xuất Thành Phẩm</title>
+    <link href="~/lib/bootstrap/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="container">
+        <div class="row mt-5">
+            <div class="col-12 text-center">
+                <h3 class="w-5 text-uppercase">Phiếu Xuất Thành Phẩm</h3>
+            </div>
+
+            <div class="col-12 mt-1">
+                <p class="text fs-6">- Họ tên người nhập hàng:</p>
+                <p class="text fs-6">- Địa chỉ (bộ phận):</p>
+            </div>
+
+            <div class="col-12">
+                <table class="table table-bordered border-dark">
+                    <thead>
+                        <tr>
+                            <td>STT</td>
+                            <td>Tên mã phiếu </td>
+                            <td>Tên thành phẩm</td>
+                            <td>PO</td>
+                            <td>Mau</td>
+                            <td>Size</td>
+                            <td>Số lượng</td>
+                            <td>Đơn giá</td>
+                            <td>Thành tiền</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in ViewBag.Load)
+                        {
+                            resul = @item.SoLuong * @item.DonGia;
+                            total += resul;
+                            count++;
+                            <tr>
+                                <td>@count</td>
+                                <td>@item.TenPhieu</td>
+                                <td>@item.TenThanhPham</td>
+                                <td>@item.PO</td>
+                                <td>@item.Mau</td>
+                                <td>@item.Size</td>
+                                <td>@item.SoLuong</td>
+                                <td>@item.DonGia</td>
+                                <td>@resul.ToString("N0")</td>
+                            </tr>
+                            resul = 0;
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="2">Tổng cộng</td>
+                            <td colspan="7" class="text-center">@total.ToString("N0")</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <div class="col-12">
+                <p class="text fs-6">- Tổng số tiền viết bằng chữ: </p>
+                <p class="text fs-6">- Số chứng từ kèm theo: </p>
+            </div>
+            <div class="col-12">
+                <p class="text fs-6 w-25 float-end text-right">Ngày.....tháng....năm........</p>
+            </div>
+            <div class="col-12 row mt-3">
+                <div class="col">
+                    <h5 class="h5 text-center">Người lập phiếu</h5>
+                    <p class="text text-center">( ký, họ tên)</p>
+                </div><div class="col">
+                    <h5 class="h5 text-center">Người nhận hàng</h5>
+                    <p class="text text-center">( ký, họ tên)</p>
+                </div><div class="col">
+                    <h5 class="h5 text-center">Thủ kho</h5>
+                    <p class="text text-center">( ký, tên)</p>
+                </div><div class="col">
+                    <h5 class="h5 text-center">Kế toán trưởng</h5>
+                    <p class="text text-center">(Hoặc bộ phận có nhu cầu nhập)</p>
+                    <p class="text text-center">(ký, họ tên)</p>
+                </div>
+                <div class="col">
+                    <h5 class="h5 text-center">Giám đốc</h5>
+                    <p class="text text-center">( ký, tên)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

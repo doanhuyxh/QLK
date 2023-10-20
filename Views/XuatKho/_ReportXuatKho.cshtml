@@ -1,0 +1,36 @@
+﻿@{
+    Layout = "~/Views/Shared/_Report.cshtml";
+    var totalTienNhap = 0;
+    var curent = 0;
+    int stt = 1;
+}
+@model List<AMS.Models.XuatKhoViewModel.ReportXuatKho>
+
+<h1 class="text-dark" style="font-size:16pt">Công ty VIT GARMENT</h1>
+<h2 class="text-dark" style="font-size:16pt">Tại kho nguyên liệu</h2>
+<h2 class="text-dark" style="font-size:16pt">Địa chỉ: Hà Nội</h2>
+<h1 class="text-center" style="font-size:16pt">Báo cáo xuất kho </h1>
+<h1 class="text-center text-blue" style="font-size:16pt">từ ngày @ViewBag.StartDate.ToString("dd/MM/yyyy") đến ngày @ViewBag.EndDate.ToString("dd/MM/yyyy")</h1>
+
+<table class="table">
+    <tr>
+        <th rowspan="2" class="text-left" style="font-size:10pt">STT</th>
+        <th rowspan="2" class="text-left" style="font-size:10pt">Mã Nguyên liệu</th>
+        <th rowspan="2" class="text-left" style="font-size:10pt">Nguyên liệu</th>
+        <th rowspan="2" class="text-left" style="font-size:10pt">Tổng số lượng xuất</th>
+        <th rowspan="2" class="text-left" style="font-size:10pt">Chất lượng </th>
+    </tr>
+    <tbody>
+    @foreach(var item in Model)
+    {
+        <tr>
+                <td class="text-left" style="font-size:10pt">@stt</td>
+                <td class="text-left" style="font-size:10pt">@item.MaNguyenLieu</td>
+                <td class="text-left" style="font-size:10pt">@item.TenNguyenLieu</td>
+                <td class="text-left" style="font-size:10pt">@item.SoLuongXuat</td>
+                <td class="text-left" style="font-size:10pt">@item.ChatLuong</td>
+        </tr>
+       stt++;
+    }
+    </tbody>
+</table>

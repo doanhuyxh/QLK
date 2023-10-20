@@ -1,0 +1,106 @@
+@model AMS.Models.KhoXuongThucTeViewModel.KhoXuongThucTeCRUDViewModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+<link rel="stylesheet" href="~/css/views/KhoXuongThucTe/EditKhoXuongThucTe.css" />
+<div id="AppKhoXuongThucTe" class="view-add-edit view-edit-KhoXuongThucTe">
+    <div class="row">
+        <div class="col-md-12">
+            <form id="frmKhoXuongThucTe">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="CreatedDate" />
+                <input type="hidden" asp-for="CreatedBy" />
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label asp-for="TenKho" class="control-label"></label>
+                            <input asp-for="TenKho" class="form-control" />
+                            <span asp-validation-for="TenKho" class="text-danger"></span>
+                        </div>
+                        <div class="form-group row">
+                            <label asp-for="ParentId" class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <select asp-for="ParentId" asp-items="@ViewBag._LoadKhoXuongThucTe"
+                                        id="ParentId" class="form-control" style="width:100%;">
+                                    <option disabled selected>--- Vui lòng chọn ---</option>
+                                </select>
+                                <span asp-validation-for="ParentId" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="GhiChu" class="control-label"></label>
+                            <input asp-for="GhiChu" class="form-control" />
+                            <span asp-validation-for="GhiChu" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <input type="button" id="btnSave" value="Lưu" onclick="Save()" class="btn btn-info">
+                    <button type="button" id="btnClose" class="btn btn-danger" data-dismiss="modal">Đóng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
+<script type="text/javascript">
+    AppKhoXuongThucTe = new Vue({
+        el: '#AppKhoXuongThucTe',
+        mounted() {
+            this.init();
+        },
+        data: {
+            Id: @Html.Raw(@Model.Id),
+            TenKho: "@Html.Raw(@Model.TenKho)",
+            ParentId: "@Html.Raw(@Model.ParentId)",
+            GhiChu: "@Html.Raw(@Model.GhiChu)",
+            images: new Map(),
+            previewImageThumb: "/images/DefaultAsset/image_thumb.png",
+            previewImage: null
+        },
+        computed: {
+
+
+
+
+        },
+        methods: {
+            fileSelected(evt, previewImage) {
+                evt.preventDefault()
+                const reader = new FileReader();
+                reader.readAsDataURL(evt.target.files[0]);
+                reader.onload = e => {
+                    document.getElementById(previewImage).style.backgroundImage = `url('${e.target.result}')`;
+                };
+                this.images.set(previewImage, evt.target.files[0]);
+            },
+            demo_func: function () {
+
+            },
+            init: function () {
+
+            },
+            makeid: function (length) {
+                let result = '';
+                const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                const charactersLength = characters.length;
+                let counter = 0;
+                while (counter < length) {
+                    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+                    counter += 1;
+                }
+                return result;
+            },
+
+
+
+
+
+
+        }
+    });
+
+
+</script>

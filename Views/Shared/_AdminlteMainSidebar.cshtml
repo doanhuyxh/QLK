@@ -1,0 +1,79 @@
+﻿@using AMS.Models.QuanLyMenuViewModel
+@model AMS.Models.DashboardViewModel.SharedUIDataViewModel
+@{
+    void RenderMenu(string Environment,List<QuanLyMenuCRUDViewModel> MenuTree, int level = 1)
+    {
+        foreach (var menu in MenuTree)
+        {
+            var level1 = level + 1;
+            <li class='nav-item  @if (level==1){
+    @Html.Raw("has-treeview")
+}'>
+                <a href="/@menu.View/@menu.Task?ItemId=@menu.Id@menu.Parameter" class="nav-link"><i class="nav-icon fas @menu.Icon"></i><p>@menu.Name</p></a>
+                @if (menu.Children.Count() > 0)
+                {
+                    <ul class="nav nav-treeview">
+                        @{
+                            RenderMenu(Environment, menu.Children, level1);
+                        }
+                    </ul>
+                }
+            </li>
+        }
+
+    }
+}
+<div >
+    <i style="margin-left: 8.6em; cursor:pointer" onclick="toggleMenu()" id="icon-1" class="fa-solid fa-caret-left fa-2xl"></i>
+    <i style="cursor:pointer" onclick="toggleMenu()" class="fa-solid fa-caret-right fa-2xl icon-2" id="icon-2"></i>
+
+    <aside class="main-sidebar sidebar-dark-primary elevation-4 " id="main-sidebar">
+    <a href="/" class="brand-link">
+        <img src='~/images/AMS.png' alt="AdminLTE Logo" class="brand-image img-circle elevation-3">
+        <span class="brand-text font-weight-light">Quản Lý Kho</span>
+    </a>
+
+    <div class="sidebar">
+        <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+        </div>
+
+        <div>
+            <input type="text" placeholder="Tìm kiếm menu" class="form-control keywords-item-sidebar" />
+        </div>
+        <nav class="mt-2 main-menu">
+
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+
+                @{
+                    RenderMenu(@Model.Environment, @Model.MenuTree, 1);
+                }
+            </ul>
+        </nav>
+    </div>
+</aside>
+</div>
+
+<script>
+    var url = window.location;
+    // for sidebar menu entirely but not cover treeview
+    $('ul.nav-sidebar a').filter(function () {
+        return this.href == url;
+    }).addClass('active');
+
+    // for treeview
+    $('ul.nav-treeview a').filter(function () {
+        return this.href == url;
+    }).parentsUntil(".nav-sidebar > .nav-treeview").addClass('menu-open').prev('a').addClass('active');
+    $('.keywords-item-sidebar').on("keyup change", function (e) {
+        var filter = $(this).val();
+        jQuery(".main-menu ul li").each(function () {
+            if ($(this).text().search(new RegExp(filter, "i")) < 0) {
+                $(this).hide();
+            } else {
+                $(this).show()
+            }
+        });
+
+    });
+
+</script>

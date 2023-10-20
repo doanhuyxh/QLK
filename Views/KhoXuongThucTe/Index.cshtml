@@ -1,0 +1,62 @@
+<link rel="stylesheet" href="~/css/views/KhoXuongThucTe/IndexKhoXuongThucTe.css" />
+<div class="wrapper view-index-KhoXuongThucTe">
+    <div class="panel panel-hash">
+        <div class="panel-heading">
+            <br />
+            <div class="top_content_heading">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="pull-left page-title">
+                            <h3>Quản lý kho xưởng thực tế</h3>
+                        </div>
+                        <div class="pull-right controlls">
+                            <a href="javascript:void(0)" onclick="AddEdit(0)">
+                                <div class="info-box">
+                                    <span class="info-box-icon bg-success elevation-1"><i class="fas fa-plus-square"></i></span>
+                                    <div class="info-box-content">
+                                        <span class="info-box-number">
+                                            Thêm
+                                        </span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-body scroll panel-height">
+            <table id="tblKhoXuongThucTe" class="table table-bordered table-striped table-bordered border-primary" style="width:100%">
+                <thead class="bg-secondary">
+                    <tr>
+                        <th>Xem</th>
+                        <th>Tên kho</th>
+                        <th>Thuộc kho cha</th>
+                        <th>Ghi chú</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .panel-heading {
+        padding: 0px 0px 0px 5px;
+    }
+
+    .panel-body {
+        padding: 5px;
+    }
+
+    .h4 {
+        margin-top: 1px;
+        margin-bottom: 1px;
+    }
+</style>
+
+<script src="~/js/KhoXuongThucTe/KhoXuongThucTe_CRUD.js"></script>
+<script src="~/js/KhoXuongThucTe/KhoXuongThucTe_Datatable.js"></script>

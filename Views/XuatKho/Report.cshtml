@@ -1,0 +1,155 @@
+﻿﻿<div class="wrapper view-index-NhapKho">
+    <div class="panel panel-hash">
+        <div class="panel-heading">
+            <br />
+            <div class="top_content_heading">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="pull-left page-title">
+                            <h3>Báo cáo xuất kho</h3>
+                        </div>
+                        <div class="pull-right controlls">
+                            <a target="_blank" href="#" v-on:click.prevent="downloadReport">
+                                <div class="info-box">
+                                    <div class="info-box-content">
+                                        <span class="info-box-number">
+                                            Tải về
+                                        </span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel-body scroll panel-height">
+
+            <div class="row">
+                <div class="col-3">
+                    <label class="form-label">Chọn ngày</label>
+                    <input class="input form-control" type="text" name="daterange" v-bind="startDateFormat +'-'+endDateFormat" />
+                </div>
+
+            </div>
+            <hr />
+            <partial name="~/Views/XuatKho/_ReportXuatKho.cshtml" />
+        </div>
+
+    </div>
+</div>
+
+<script type="text/javascript">
+    var dateFormat = 'DD/MM/YYYY';
+    var endDate = moment();
+    var endDateFormat = moment().format(dateFormat);
+    var startDateFormat = endDate.subtract(30, 'd').format(dateFormat);
+    console.log("endDateFormat", endDateFormat);
+    console.log("startDateFormat", startDateFormat);
+
+    AppXuatKho = new Vue({
+        el: '.view-index-NhapKho',
+        mounted() {
+            this.init();
+        },
+        data: {
+            label: "",
+            startDateFormat: startDateFormat,
+            endDateFormat: endDateFormat
+        },
+        computed: {
+
+        },
+        mounted() {
+
+            // Lấy giá trị của các tham số từ URL
+            const params = new URLSearchParams(window.location.search);
+            this.startDateFormat = params.get("startDateFormat") ? params.get("startDateFormat") : this.startDateFormat;
+            this.endDateFormat = params.get("endDateFormat") ? params.get("endDateFormat") : this.endDateFormat;
+            console.log("params.get(endDateFormat)", params.get("endDateFormat"));
+        },
+
+        methods: {
+            downloadReport() {
+                // Chuyển hướng trang đến URL chứa các tham số truyền vào
+                const url = "/XuatKho/ReportXuatKho?startDateFormat=" + this.startDateFormat + "&endDateFormat=" + this.endDateFormat;
+                console.log(url);
+                window.open(url, "_blank");
+            },
+            UpdateRangeDate: function (startDateFormat, endDateFormat, label) {
+                this.startDateFormat = startDateFormat;
+                this.endDateFormat = endDateFormat;
+                this.label = label;
+                console.log("A new date selection was made: " + this.startDateFormat + ' to ' + this.endDateFormat);
+                var currentUrl = window.location.href;
+                currentUrl = this.replaceUrlParam(currentUrl, 'startDateFormat', this.startDateFormat);
+                currentUrl = this.replaceUrlParam(currentUrl, 'endDateFormat', this.endDateFormat);
+                window.location.href = currentUrl;
+
+
+
+            },
+            replaceUrlParam: function (url, paramName, paramValue) {
+                if (paramValue == null) {
+                    paramValue = '';
+                }
+                var pattern = new RegExp('\\b(' + paramName + '=).*?(&|#|$)');
+                if (url.search(pattern) >= 0) {
+                    return url.replace(pattern, '$1' + paramValue + '$2');
+                }
+                url = url.replace(/[?#]$/, '');
+                return url + (url.indexOf('?') > 0 ? '&' : '?') + paramName + '=' + paramValue;
+            }
+            //applyFilter() {
+            //    const url = '/XuatKho/Report?startDateFormat=' + this.startDateFormat + '&endDateFormat=' + this.endDateFormat;
+            //    window.location.href = url;
+            //}
+
+        }
+    });
+    //$('input[name="daterange"]').daterangepicker({
+    //    ranges: {
+    //        'Hôm nay': [moment(), moment()],
+    //        'Hôm qua': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+    //        '7 ngày trước': [moment().subtract(6, 'days'), moment()],
+    //        '30 ngày trước': [moment().subtract(29, 'days'), moment()],
+    //        'Tháng này': [moment().startOf('month'), moment().endOf('month')],
+    //        'Tháng trước': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+    //    },
+    //    opens: 'left'
+    //}, function (start, end, label) {
+    //    AppXuatKho.UpdateRangeDate(start, end, label);
+
+    //});
+    $(document).ready(function () {
+        $('input[name="daterange"]').daterangepicker({
+            ranges: {
+                'Hôm nay': [moment(), moment()],
+                'Hôm qua': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                '7 ngày trước': [moment().subtract(6, 'days'), moment()],
+                '30 ngày trước': [moment().subtract(29, 'days'), moment()],
+                'Tháng này': [moment().startOf('month'), moment().endOf('month')],
+                'Tháng trước': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            },
+            opens: 'left'
+        }, function (startDate, endDate, label) {
+            startDateFormat = moment(startDate).format(dateFormat);
+            endDateFormat = moment(endDate).format(dateFormat);
+            // Cập nhật giá trị cho startDate và endDate
+            AppXuatKho.UpdateRangeDate(startDateFormat, endDateFormat, label);
+
+
+        });
+        $('input[name="daterange"]').on('apply.daterangepicker', function (ev, picker) {
+            if (picker.chosenLabel === 'Hôm nay') {
+                startDateFormat = moment(picker.startDate).format(dateFormat);
+                endDateFormat = moment(picker.endDate).format(dateFormat);
+                // Cập nhật giá trị cho startDate và endDate
+                AppXuatKho.UpdateRangeDate(startDateFormat, endDateFormat, picker.chosenLabel);
+            }
+        });
+
+
+    });
+
+</script>

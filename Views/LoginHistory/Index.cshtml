@@ -1,0 +1,61 @@
+@{
+    ViewData["Title"] = "Login History";
+}
+
+<div class="wrapper">
+    <div class="panel panel-hash">
+        <div class="row">
+            <div class="col-md-6">
+            </div>
+            <div class="col-md-6 pull-right">
+                <h5 class="pull-right"><b>Danh sách lịch sử đăng nhập</b></h5>
+            </div>
+        </div>
+
+        <div class="panel-body scroll panel-height">
+            <table id="tblLoginHistoryInfo" class="table table-bordered table-striped" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Tên tài khoản</th>
+                        <th>Thời gian đăng nhập</th>
+                        <th>Thời gian đăng xuất</th>
+                        <th>Thời lượng (tối thiểu)</th>
+                        <th>IP công cộng</th>
+                        <th>Vĩ độ</th>
+                        <th>Kinh độ</th>
+                        <th>Trình duyệt</th>
+                        <th>OS</th>
+                        <th>Thiết bị</th>
+                        <th>Hoạt động</th>
+                        <th>Trạng thái hành động</th>
+
+                        <th>Ngày tạo</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+    <partial name="~/Views/UIComponents/_bootstrapAlert.cshtml" />
+</div>
+
+<partial name="~/Views/UIComponents/_MediumModal.cshtml" />
+
+<style>
+    .panel-heading {
+        padding: 0px 0px 0px 5px;
+    }
+
+    .panel-body {
+        padding: 5px;
+    }
+
+    .h4 {
+        margin-top: 1px;
+        margin-bottom: 1px;
+    }
+</style>
+
+<script src="~/js/LoginHistory/LoginHistory_CRUD.js"></script>
+<script src="~/js/LoginHistory/LoginHistory_Datatable.js"></script>
+

@@ -1,0 +1,70 @@
+﻿@model AMS.Models.UserAccountViewModel.UserProfileCRUDViewModel
+
+<div class="row">
+    <table class="table table-bordered table-striped" border="1" style=" width:100%;margin:1px auto;">
+        <tr>
+            <th>ID</th>
+            <td>@Model.UserProfileId</td>
+        </tr>
+        <tr>
+            <th>Ảnh Đại chiện</th>
+            <td>
+                <div class="user-panel mt-2 pb-2 mb-2 d-flex">
+                    <div class="image">
+                        <img src="@Model.ProfilePicturePath" class="img-circle elevation-2" alt="User Image">
+                    </div>
+                    <div class="info">
+                        <a href="#" class="d-block" onclick="ViewImage('@Model.ProfilePicturePath', '@Model.FirstName')">
+                            @Model.FirstName @Model.LastName
+                        </a>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <th>Id User trong ứng dụng</th>
+            <td>@Model.ApplicationUserId</td>
+        </tr>
+        <tr>
+            <th>Họ</th>
+            <td>@Model.FirstName</td>
+        </tr>
+        <tr>
+            <th>Tên</th>
+            <td>@Model.LastName</td>
+        </tr>
+        <tr>
+            <th>Số điện thoại</th>
+            <td>@Model.PhoneNumber</td>
+        </tr>
+        <tr>
+            <th>email</th>
+            <td>@Model.Email</td>
+        </tr>
+        <tr>
+            <th>Địa chỉ</th>
+            <td>@Model.Address</td>
+        </tr>
+        <tr>
+            <th>Quốc gia</th>
+            <td>@Model.Country</td>
+        </tr>
+
+        <tr>
+            <th>Ngày tạo</th>
+            <td>@Model.CreatedDate</td>
+        </tr>
+        <tr>
+            <th>Ngày cập nhật cuối</th>
+            <td>@Model.ModifiedDate</td>
+        </tr>
+        <tr>
+            <th>Người tạo</th>
+            <td>@Model.CreatedBy</td>
+        </tr>
+        <tr>
+            <th>Người cập nhật cuối</th>
+            <td>@Model.ModifiedBy</td>
+        </tr>
+    </table>
+</div>

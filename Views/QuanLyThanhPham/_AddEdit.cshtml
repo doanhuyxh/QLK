@@ -1,0 +1,125 @@
+@model AMS.Models.QuanLyThanhPhamViewModel.QuanLyThanhPhamCRUDViewModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+<link rel="stylesheet" href="~/css/views/QuanLyThanhPham/EditQuanLyThanhPham.css" />
+<div id="AppQuanLyThanhPham" class="view-add-edit view-edit-QuanLyThanhPham">
+    <div class="row">
+        <div class="col-md-12">
+            <form id="frmQuanLyThanhPham">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="CreatedDate" />
+                <input type="hidden" asp-for="CreatedBy" />
+                <input asp-for="SoLuong" type="hidden" class="form-control" />
+
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label asp-for="TenThanhPham" class="control-label"></label>
+                            <input asp-for="TenThanhPham" class="form-control" />
+                            <span asp-validation-for="TenThanhPham" class="text-danger"></span>
+                        </div>
+                         
+
+                        <div class="form-group">
+                            <label asp-for="KhachHang" class="control-label"></label>
+                            <input asp-for="KhachHang" class="form-control" />
+                            <span asp-validation-for="KhachHang" class="text-danger"></span>
+                        </div>
+                         <div class="form-group">
+                            <label asp-for="Mau" class="control-label"></label>
+                            <input asp-for="Mau" class="form-control" />
+                            <span asp-validation-for="Mau" class="text-danger"></span>
+                        </div>
+                         <div class="form-group">
+                            <label asp-for="Size" class="control-label"></label>
+                            <input asp-for="Size" class="form-control" />
+                            <span asp-validation-for="Size" class="text-danger"></span>
+                        </div>
+                         <div class="form-group">
+                            <label asp-for="PO" class="control-label"></label>
+                            <input asp-for="PO" class="form-control" />
+                            <span asp-validation-for="PO" class="text-danger"></span>
+                        </div>
+
+                         <div class="form-group">
+                            <label asp-for="GhiChu" class="control-label"></label>
+                            <input asp-for="GhiChu" class="form-control" />
+                            <span asp-validation-for="GhiChu" class="text-danger"></span>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="form-group">
+                    <input type="button" id="btnSave" value="Lưu" onclick="Save()" class="btn btn-info">
+                    <button type="button" id="btnClose" class="btn btn-danger" data-dismiss="modal">Đóng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
+<script type="text/javascript">
+    AppQuanLyThanhPham = new Vue({
+        el: '#AppQuanLyThanhPham',
+        mounted() {
+            this.init();
+
+        },
+        data: {
+            Id: @Html.Raw(@Model.Id),
+            TenThanhPham: "@Html.Raw(@Model.TenThanhPham)",
+            GhiChu: "@Html.Raw(@Model.GhiChu)",
+            SoLuong: "@Html.Raw(@Model.SoLuong)",
+            images: new Map(),
+            previewImageThumb: "/images/DefaultAsset/image_thumb.png",
+            previewImage: null
+        },
+        computed: {
+
+
+
+
+        },
+        methods: {
+            fileSelected(evt, previewImage) {
+                evt.preventDefault()
+                const reader = new FileReader();
+                reader.readAsDataURL(evt.target.files[0]);
+                reader.onload = e => {
+                    document.getElementById(previewImage).style.backgroundImage = `url('${e.target.result}')`;
+                };
+                this.images.set(previewImage, evt.target.files[0]);
+            },
+            demo_func: function () {
+
+            },
+            init: function () {
+
+            },
+            makeid: function (length) {
+                let result = '';
+                const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                const charactersLength = characters.length;
+                let counter = 0;
+                while (counter < length) {
+                    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+                    counter += 1;
+                }
+                return result;
+            },
+           
+
+
+
+
+
+
+        }
+    });
+
+
+</script>

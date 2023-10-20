@@ -1,0 +1,208 @@
+@model AMS.Models.KiemKhoViewModel.KiemKhoCRUDViewModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+<link rel="stylesheet" href="~/css/views/KiemKho/EditKiemKho.css" />
+<div id="AppKiemKho" class="view-add-edit view-edit-KiemKho">
+    <div class="row">
+        <div class="col-md-12">
+            <form id="frmKiemKho">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" id="Id" />
+                <input type="hidden" asp-for="CreatedDate" id="CreatedDate" />
+                <input type="hidden" asp-for="CreatedBy" id="CreatedBy" />
+                <div class="col-12">
+                    <div class="form-group">
+                        <label asp-for="Name" class="control-label"></label>
+                        <input asp-for="Name" class="form-control" id="Name" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="form-group">
+                        <label asp-for="KhoId" class="control-label"></label>
+                        <select v-bind:disabled="HaveId" v-model="KhoId" id="KhoId" asp-for="KhoId" class="form-control">
+                            <option disabled value="">Chọn kho</option>
+                            <option v-for="nlk in DanhSachKho" v-bind:key="nlk.Id" v-bind:value="nlk.Id">{{ nlk.TenKho }}</option>
+
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label asp-for="NhanVienId" class="control-label"></label>
+                            <select v-bind:disabled="HaveId" v-model="NhanVienId" id="NhanVienId" asp-for="NhanVienId" class="form-control">
+                                <option disabled value="">Chọn nhân viên</option>
+                                <option v-for="nv in DanhSachUser" v-bind:key="nv.UserProfileId" v-bind:value="nv.UserProfileId">
+                                    {{ nv.FirstName + ' ' + nv.LastName }}
+
+                                </option>
+
+                            </select>
+
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label asp-for="NgayKiem" class="control-label"></label>
+                            <input asp-for="NgayKiem" class="form-control" type="date" id="NgayKiem" />
+                            <span asp-validation-for="NgayKiem" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <td scope="col">STT</td>
+                                <td scope="col">Nguyên liệu</td>
+                                <td scope="col">Số lượng thực tế</td>
+                                <td scope="col">Chất lượng</td>
+                                <th></th>
+
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr v-for="(item,index) in backupItem">
+                                <input type="hidden" v-model="item.KiemKhoId" />
+                                <td>{{index+1}}</td>
+                                <td>
+                                    <select v-model="item.NguyenLieuId" class="form-control">
+                                        <option disabled value="">Chọn nguyên liệu</option>
+                                        <option v-for="nl in DanhSachNguyenLieu" v-bind:key="nl.Id" v-bind:value="nl.Id">{{ nl.Name }}</option>
+
+                                    </select>
+                                </td>
+
+                                <td>
+                                    <input v-model="item.SoLuongThucTe" type="number" class="form-control" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+                                </td>
+
+                                <td>
+                                    <input v-model="item.ChatLuong" type="text" class="form-control" />
+                                </td>
+
+                                <td><button class="btn btn-warning" type="button" v-on:click="Xoa(index)">Xoá</button></td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="6" class="text-right"></td>
+                                <td><button type="button" class="btn btn-primary" v-on:click="ThemMoi()">Thêm</button></td>
+                            </tr>
+                        </tfoot>
+
+                    </table>
+                </div>
+                <div class="form-group">
+                    <input type="button" id="btnSave" value="Lưu" onclick="Save()" class="btn btn-info">
+                    <button type="button" id="btnClose" class="btn btn-danger" data-dismiss="modal">Đóng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
+<script type="text/javascript">
+    AppKiemKho = new Vue({
+        el: '#AppKiemKho',
+        mounted() {
+            this.init();
+        },
+        data: {
+            Id: @Html.Raw(@Model.Id),
+            items: @Html.Raw(ViewBag._LoadNlKk),
+            NhanVienId: @Model.NhanVienId,
+            images: new Map(),
+            previewImageThumb: "/images/DefaultAsset/image_thumb.png",
+            previewImage: null,
+            DanhSachNguyenLieu: [],
+            DanhSachKho: [],
+            DanhSachUser: [],
+            HaveId: false
+        },
+        computed: {
+            backupItem: function () {
+                return this.items.filter(item => item.Cancelled == false)
+            }
+
+        },
+
+        methods: {
+            fileSelected(evt, previewImage) {
+                evt.preventDefault()
+                const reader = new FileReader();
+                reader.readAsDataURL(evt.target.files[0]);
+                reader.onload = e => {
+                    document.getElementById(previewImage).style.backgroundImage = `url('${e.target.result}')`;
+                };
+                this.images.set(previewImage, evt.target.files[0]);
+            },
+            demo_func: function () {
+
+            },
+            init: function () {
+                fetch("/NguyenLieu/GetIdAndNameNguyenLieuAPI")
+                    .then(res => res.json())
+                    .then(data => {
+                        this.DanhSachNguyenLieu = data;
+                    });
+                fetch("/Khoxuongthucte/GetApiKho")
+                    .then(res => res.json())
+                    .then(
+                        data => {
+                            this.DanhSachKho = data
+                        }
+                    );
+                fetch("/KiemKho/GetNguoiDung")
+                    .then(res => res.json())
+                    .then(
+                        data => {
+                            this.DanhSachUser = data
+                        }
+                    );
+
+                 if(@Html.Raw(@Model.Id) > 0){
+                    this.HaveId = true;
+                 }
+            },
+            makeid: function (length) {
+                let result = '';
+                const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                const charactersLength = characters.length;
+                let counter = 0;
+                while (counter < length) {
+                    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+                    counter += 1;
+                }
+                return result;
+            },
+            ThemMoi: function () {
+                this.items.push({
+                    Id: 0,
+                    NguyenLieuId: null,
+                    SoLuongThucTe: null,
+                    ChatLuong: "",
+                    KiemKhoId: 0,
+                    Cancelled: false
+
+                })
+            },
+            Xoa: function (index) {
+                if (this.items.filter(item => item.Cancelled == false).length > 1) {
+                    this.items[index].Cancelled = true
+                }
+                if (this.items[index].Cancelled == true && this.items[index].Id == 0) {
+                    this.items.splice(index, 1);
+                }
+
+            },
+        }
+    });
+
+
+</script>

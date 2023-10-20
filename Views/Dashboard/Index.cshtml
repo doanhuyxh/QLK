@@ -1,0 +1,244 @@
+﻿@{
+    ViewData["Title"] = "Bảng điều khiển";
+}
+
+<div class="wrapper" id="dashboad">
+    <section class="content m-1">
+        <div class="container-fluid">
+            <!-- Small boxes (Stat box) -->
+        </div>
+        <div class="row" style="padding: 2em;">
+
+            <div class="col-lg-4 col-6">
+                <!-- small box -->
+                <div class="small-box bg-info">
+                    <div class="inner">
+                        <h3>@ViewBag.SoLuongNguyenLieu</h3>
+                        <p>Số lượng nguyên liệu</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-bag"></i>
+                    </div>
+
+                </div>
+            </div>
+            <!-- ./col -->
+            <div class="col-lg-4 col-6">
+                <!-- small box -->
+                <div class="small-box bg-warning">
+                    <div class="inner">
+                        <h3>@ViewBag.SoLuongNguoiDung</h3>
+
+                        <p>Số lượng người dùng</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-person-add"></i>
+                    </div>
+
+                </div>
+            </div>
+            <!-- ./col -->
+            <div class="col-lg-4 col-6">
+                <!-- small box -->
+                <div class="small-box bg-success">
+                    <div class="inner">
+                        <h3>@ViewBag.SoLuongKhachHang</h3>
+
+                        <p>Số lượng khách hàng</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-pie-graph"></i>
+                    </div>
+
+                </div>
+            </div>
+            <!-- ./col -->
+        </div>
+        <!-- /.row -->
+        <!-- Main row -->
+        <div class="row mx-md-n5" style="padding: 2em;">
+            <div class="col-lg-12 bg-opacity-25" style="">
+                <p class="text-bold text-center">Nguyên Liệu Trong Kho</p>
+                <div class="" id="barchart_material" style="width:95%; height: 320px; margin:auto"></div>
+            </div>
+
+            <div class="col-lg-12 bg-opacity-75" style="padding-left: 2em">
+                <h4 class="text-bold text-center">Nguyên liệu đang về</h4>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <table id="DanhSacNhapHangLyThuyet" class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Mã phiếu</th>
+                                    <th>Số lô</th>
+                                    <th>Tên khách hàng</th>
+                                    <th>Ngày hàng về</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+
+
+            </div>
+
+            <div class="col-12 px-md-5 m-2 p-5 bg-light" >
+                <h4 class="text-bold text-center">Người dùng gần đây</h4>
+                <table id="DanhSacNguoiDung" class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Họ Tên</th>
+                            <th>Ảnh đại diện</th>
+                            <th>Quyền hạn</th>
+                            <th>Ngày thêm</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+
+        </div>
+        <!-- /Main row -->
+
+    </section>
+</div>
+
+
+<script src="~/js/UserManagement/UserManagement_CRUD.js"></script>
+<script src="~/lib/googelChart.js"></script>
+<script type="text/javascript">
+    var dashboad = new Vue({
+        el: "#dashboad",
+        data: {
+            danhSachNhapKho: []
+        },
+        mounted() {
+            this.chartNguyenLieu();
+            this.danhSachHangChoNhapHang();
+            this.danhSacNguoiDung();
+            axios.get('/NhapKhoLyThuyet/GetDueNhapKho')
+                .then(response => {
+                    this.danhSachNhapKho = response.data;
+                    console.log("this.danhSachNhapKho", this.danhSachNhapKho)
+                })
+                .catch(error => {
+                    console.log(error);
+                });
+        },
+        methods: {
+            formatDate(date) {
+                const options = { day: "2-digit", month: "2-digit", year: "numeric" };
+                const formattedDate = new Date(date).toLocaleDateString(undefined, options);
+                return formattedDate;
+            },
+
+            chartNguyenLieu: function () {
+                google.charts.load('current', { 'packages': ['bar'] });
+                google.charts.setOnLoadCallback(drawChart);
+                function drawChart() {
+                    fetch("/Dashboard/CharNguyenLieuAPI")
+                        .then(res => res.json())
+                        .then(apiData => {
+                            console.log(apiData);
+                            var data = new google.visualization.DataTable();
+                            data.addColumn('string', 'Nguyên Liệu');
+                            data.addColumn('number', 'Thực tế');
+                            data.addColumn('number', 'Lý thuyết');
+                            for (var i = 0; i < apiData.length; i++) {
+                                console.log(data);
+                                var row = [];
+                                row.push(apiData[i].label);
+                                row.push(apiData[i].TT);
+                                row.push(apiData[i].LT);
+                                data.addRow(row);
+                            }
+                            var options = {
+                                chart: {
+                                    title: 'Số lượng nguyên liệu thực tế và lý thuyết trong kho hiện tại',
+                                },
+                                bars: 'vertical'
+                            };
+                            var chart = new google.charts.Bar(document.getElementById('barchart_material'));
+                            chart.draw(data, google.charts.Bar.convertOptions(options));
+                        })
+                        .catch(err => {
+                            alert('Cố lỗi trong kết nối đường truyền mạng');
+                        })
+                }
+            },
+
+            danhSachHangChoNhapHang: function () {
+                //Nhập kho lý thuyết
+                let dsconLyThuyet = document.getElementById("DanhSacNhapHangLyThuyet");
+                let bodyTable2 = document.createElement("tbody");
+                fetch("/Dashboard/DanhSachNhapHangChoLyThuyet")
+                    .then(res => res.json())
+                    .then(data => {
+                        console.log(data)
+                        data.forEach(item => {
+                            let tr = document.createElement("tr");
+
+                            let td0 = document.createElement("td");
+                            td0.innerText = item.MaPhieu;
+                            tr.appendChild(td0);
+
+                            let td1 = document.createElement("td");
+
+                            td1.innerText = item.SoLo;
+                            tr.appendChild(td1);
+
+                            let td2 = document.createElement("td");
+
+                            td2.innerText = item.TenKhachHang;
+                            tr.appendChild(td2);
+
+
+                            let td3 = document.createElement("td");
+                            let dateTime = new Date(item.NgayNhap)
+                            let day = dateTime.getDate().toString().padStart(2, '0'); // Lấy ngày và thêm '0' phía trước nếu chỉ có 1 chữ số
+                            let month = (dateTime.getMonth() + 1).toString().padStart(2, '0'); // Lấy tháng (đánh số từ 0) và thêm '0' phía trước nếu chỉ có 1 chữ số
+                            let year = dateTime.getFullYear();
+
+                            let formattedDate = `${day}/${month}/${year}`;
+                            td3.innerText = formattedDate
+                            tr.appendChild(td3)
+
+                            let td4 = document.createElement("td");
+                            td4.innerText = item.TrangThai ? "Đã Nhập" : "Chưa nhập";
+                            tr.appendChild(td4)
+
+                            bodyTable2.appendChild(tr)
+                        });
+                        dsconLyThuyet.appendChild(bodyTable2);
+                    })
+                    .catch(err => {
+                        console.log(err)
+                    });
+            },
+
+            danhSacNguoiDung: function () {
+                let table = document.getElementById("DanhSacNguoiDung");
+                let bodyTable = document.createElement("tbody");
+                fetch("/Dashboard/DanhSachUserTaoGanDay")
+                    .then(res => res.json())
+                    .then(data => {
+                        let html = "";
+                        data.forEach(item => {
+                            html += `<tr>
+                                                            <th>${item.Name}</th>
+                                                            <th><img src="${item.AnhDaiDien}" style="width:70px; height:auto"/></th>
+                                                                <th>${item.QuyenHan}</th>
+                                                                    <th>${item.NgaySuaCuoi}</th>
+                                                                    </tr>
+                                            `
+                        });
+
+                        bodyTable.innerHTML = html;
+                        table.appendChild(bodyTable);
+                    })
+            }
+        }
+    });
+
+
+</script>

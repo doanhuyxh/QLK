@@ -1,0 +1,446 @@
+@model AMS.Models.PhieuXuatThanhPhamViewModel.PhieuXuatThanhPhamCRUDViewModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+<link rel="stylesheet" href="~/css/views/PhieuXuatThanhPham/EditPhieuXuatThanhPham.css" />
+<div id="AppPhieuXuatThanhPham" class="view-add-edit view-edit-PhieuXuatThanhPham">
+    <div class="row">
+        <div class="col-md-12">
+            <form id="frmPhieuXuatThanhPham">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="CreatedDate" />
+                <input type="hidden" asp-for="CreatedBy" />
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-check btn-outline-primary btn m-2">
+                            <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios" value="check" v-on:change="PhuongThucNhap(1)" checked>
+                            <label class="form-check-label" for="exampleRadios">
+                                Nhập thủ công
+                            </label>
+                        </div>
+                        <div class="form-check btn-outline-primary btn m-2">
+                            <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios3" value="option2" v-on:change="PhuongThucNhap(2)">
+                            <label class="form-check-label" for="exampleRadios3">
+                                Nhập phiếu bằng file excel
+                            </label>
+                        </div>
+                       
+                        <div class="form-group">
+                            <label asp-for="MaPhieuXuat" class="control-label"></label>
+                            <input asp-for="MaPhieuXuat" class="form-control" readonly v-model="maNhap" />
+                            <span asp-validation-for="MaPhieuXuat" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="NgayDuKienXuat" class="control-label"></label>
+                            <input asp-for="NgayDuKienXuat" type="date" class="form-control" />
+                            <span asp-validation-for="NgayDuKienXuat" class="text-danger"></span>
+                        </div>
+                        <div class="col-12 row" v-show="isImportExcel">
+                            <div class="col-9 text-center">
+                                <div class="input-group m-3">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="inputGroupFileAddon01">Upload</span>
+                                    </div>
+                                    <div class="custom-file">
+                                        <input type="file" class="custom-file-input" id="excelFile" aria-describedby="inputGroupFileAddon01" v-on:change="HandleExcelFile()">
+                                        <label class="custom-file-label" for="excelFile">Choose file</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-3 ">
+                                <div class="m-3 btn btn-info" v-on:click="donwloadTemplate()">File mẫu</div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="col-12 font-weight-bold text-danger text-center">Thành Phẩm Xuất Kho</p>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <td>STT</td>
+                                <td>Ngày nhập</td>
+                                <td>Khách hàng</td>
+                                <td>Mã hàng</td>
+                                <td>Tên thành phẩm </td>
+                                <td>PO</td>
+                                <td>Màu sắc</td>
+                                <td>Size</td>
+                                <td>Số Lượng</td>
+                                <td>Đơn Giá</td>
+                                <td>Thành tiền</td>
+                                <td></td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(item,index) in BackupItem">
+                                <td>{{index+1}}</td>
+                                <td>
+                                    <input v-model="item.NgayNhap" v-if="isImportExcel" type="text" class="form-control" />
+                                    <input v-else-if="Id > 0" v-model="item.NgayNhap.split(`T`)[0]" type="text" class="form-control" />
+                                    <input v-else="Id == 0" v-model="item.NgayNhap" type="date" class="form-control" />
+                                </td>
+                                <td>
+                                    <input v-model="item.KhachHang" type="text" class="form-control" />
+                                </td>
+                                <td>
+                                    <input v-model="item.MaHang" type="text" class="form-control" />
+                                </td>
+                                <td>
+                                    <select v-model="item.IDThanhPham" class="form-control " v-on:change="autoFill(index)">
+                                        <option disabled value="">Chọn thành phẩm</option>
+                                        <option v-for="nl in DanhSachThanhPham" v-bind:key="nl.Id" v-bind:value="nl.Id">{{ nl.TenThanhPham }}</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input v-model="item.PO" type="text" class="form-control" />
+                                </td>
+                                <td>
+                                    <input v-model="item.Mau" type="text" class="form-control" />
+                                </td>
+                                <td>
+                                    <input v-model="item.Size" type="text" class="form-control" />
+                                </td>
+
+                                <td>
+                                    <input v-model="item.SoLuong" type="number" class="form-control" />
+                                </td>
+                                <td>
+                                    <input v-model="item.DonGia" type="number" class="form-control" />
+                                </td>
+                                <td>
+                                    <input readonly v-bind:value="formatCurrency(item.SoLuong*item.DonGia)" class="form-control" />
+                                </td>
+                                <td><button class="btn btn-warning" type="button" v-on:click="Xoa(index)">Xoá</button></td>
+                            </tr>
+
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="11">Tổng cộng: {{toatl}}</td>
+                                <td><button type="button" class="btn btn-primary" v-on:click="Them()">Thêm</button></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div class="form-group">
+                    <input type="button" id="btnSave" value="Lưu" onclick="Save()" class="btn btn-info">
+                    <button type="button" id="btnClose" class="btn btn-danger" data-dismiss="modal">Đóng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<script lang="javascript" src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+
+<script src="/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
+<script type="text/javascript">
+    AppPhieuXuatThanhPham = new Vue({
+        el: '#AppPhieuXuatThanhPham',
+        mounted() {
+            this.init();
+            this.RenderMa();
+        },
+        data: {
+            Id: @Html.Raw(@Model.Id),
+            MaPhieuXuat: "@Html.Raw(@Model.MaPhieuXuat)",
+            NgayDuKienXuat: "@Html.Raw(@Model.NgayDuKienXuat)",
+            images: new Map(),
+            previewImageThumb: "/images/DefaultAsset/image_thumb.png",
+            previewImage: null,
+            ThanhPhamNhapKho: @Html.Raw(ViewBag.PhieuXuatThanhPham),
+            DanhSachThanhPham: [],
+            maNhap: "",
+            isImportExcel: false,
+
+
+
+        },
+        computed: {
+
+            BackupItem: function () {
+                return this.ThanhPhamNhapKho.filter(item => item.Cancelled == false)
+            },
+            toatl: function () {
+                let totals = 0;
+                this.ThanhPhamNhapKho.forEach(item => {
+                    totals += (item.SoLuong * item.DonGia)
+                })
+                return this.formatCurrency(totals);
+            }
+
+
+        },
+        methods: {
+            fileSelected(evt, previewImage) {
+                evt.preventDefault()
+                const reader = new FileReader();
+                reader.readAsDataURL(evt.target.files[0]);
+                reader.onload = e => {
+                    document.getElementById(previewImage).style.backgroundImage = `url('${e.target.result}')`;
+                };
+                this.images.set(previewImage, evt.target.files[0]);
+            },
+            demo_func: function () {
+
+            },
+            init: function () {
+                fetch("/QuanLyThanhPham/GetAllThanhPham")
+                    .then(res => res.json())
+                    .then(data => {
+                        this.DanhSachThanhPham = data;
+                    })
+            },
+            makeid: function (length) {
+                let result = '';
+                const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                const charactersLength = characters.length;
+                let counter = 0;
+                while (counter < length) {
+                    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+                    counter += 1;
+                }
+                return result;
+            },
+            formatCurrency(amount) {
+                const formatter = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' });
+                return formatter.format(amount);
+            },
+            RenderMa: function () {
+                if (this.Id != 0) {
+                    this.maNhap = this.MaPhieuXuat;
+                    return;
+                }
+                const currentDate = new Date();
+                const day = currentDate.getDate();
+                const month = currentDate.getMonth() + 1;
+                const year = currentDate.getFullYear();
+                const CurrentThis = this;
+                let MaPhieuMuaHang = `PXTP${year}${month}${day}`;
+                fetch(`/PhieuXuatThanhPham/GetAllMaPhieuThanhPhamByMa?ma=${MaPhieuMuaHang}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        let count = data.length;
+                        data.forEach(element => {
+                            CurrentThis.MaApi = (element.MaNhap);
+                        });
+                        if (count == 0) {
+                            CurrentThis.maNhap = MaPhieuMuaHang;
+                        }
+                        else {
+                            CurrentThis.maNhap = MaPhieuMuaHang + "_" + count;
+                        }
+
+                    })
+                    .catch(err => {
+                        CurrentThis.maNhap = MaPhieuMuaHang
+                    })
+            },
+            Them: function () {
+                this.ThanhPhamNhapKho.push({
+                    Id: 0,
+                    Cancelled: false,
+                    IDThanhPham: 0,
+                    SoLuong: 0,
+                    DonGia: 0,
+                    IDPhieu: 0,
+                    PO: "",
+                    Size: "",
+                    Mau: "",
+                })
+            },
+            autoFill: function (index) {
+                if(this.isImportExcel == false){
+                    let tp = this.DanhSachThanhPham.filter(i => i.Id == this.ThanhPhamNhapKho[index].IDThanhPham)[0];
+                    console.log(tp);
+                    this.ThanhPhamNhapKho[index].PO = tp.PO;
+                    this.ThanhPhamNhapKho[index].Size = tp.Size;
+                    this.ThanhPhamNhapKho[index].Mau = tp.Mau;
+                }
+                return;
+               
+
+            },
+            HandleExcelFile() {
+                if (!this.isImportExcel) {
+                    console.log("Không có file tồn tại")
+                    return;
+                }
+
+                let file = document.getElementById("excelFile").files[0];
+                document.getElementById("excelFile").nextElementSibling.innerHTML = file.name;
+
+                let CurrentThis = this;
+                let reader = new FileReader();
+
+                reader.onload = (event) => {
+                    $('#preloader').fadeIn();
+                    const data = event.target.result;
+
+                    const workbook = XLSX.read(data, { type: 'binary' });
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+                    console.table(jsonData);
+
+                    // TODO Thêm mới khi chưa có thành phẩm
+                    let NguyenLieuChuaTonTai = [];
+                    for (const item1 of jsonData) {
+                        const exists = CurrentThis.DanhSachThanhPham.some(item2 => CurrentThis.removeAccents(item2.TenThanhPham).trim().toLowerCase() === CurrentThis.removeAccents(item1["Tên thành phẩm"]).trim().toLowerCase());
+                        if (!exists) {
+                            NguyenLieuChuaTonTai.push({
+                                Id: 0,
+                                TenThanhPham: `${item1["Tên thành phẩm"]}`,
+                                GhiChu: "Không có ghi chú gì",
+                                SoLuong: `${item1["Số Lượng"]}`,
+                                KhachHang: "Chưa có tên khách hàng",
+                                Mau: `${item1["Màu sắc"]}`,
+                                Size: `${item1["Size"]}`,
+                                PO: `${item1["PO"]}`
+
+                            });
+                        }
+                    }
+
+                    if (NguyenLieuChuaTonTai.length > 0) {
+                        let CurrentThis2 = CurrentThis;
+                        let curentJsonData = jsonData;
+
+                        fetch(`/PhieuNhapThanhPham/AddThanhPhamWhenNhapKho`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(NguyenLieuChuaTonTai),
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                fetch("/QuanLyThanhPham/GetAllThanhPham")
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        CurrentThis2.DanhSachThanhPham = data;
+                                    }).
+                                    then(data => {
+                                        for (let i = 0; i < jsonData.length; i++) {
+                                            for (let j = 0; j < CurrentThis2.DanhSachThanhPham.length; j++) {
+                                                let datajson = CurrentThis2.removeAccents(jsonData[i]['Tên thành phẩm']).trim().toLowerCase();
+                                                let dataApi = CurrentThis2.removeAccents(CurrentThis2.DanhSachThanhPham[j]['TenThanhPham']).trim().toLowerCase();
+                                                if (datajson == dataApi) {
+                                                    CurrentThis2.ThanhPhamNhapKho.push({
+                                                        Id: 0,
+                                                        Cancelled: false,
+                                                        IDThanhPham: CurrentThis2.DanhSachThanhPham[j]['Id'],
+                                                        SoLuong: jsonData[i]['Số Lượng'],
+                                                        DonGia: jsonData[i]['Đơn Giá'],
+                                                        IDPhieu: 0,
+                                                        PO: jsonData[i]['PO'],
+                                                        Size: jsonData[i]['Size'],
+                                                        Mau: jsonData[i]['Màu sắc'],
+                                                        KhachHang: jsonData[i]['Khách hàng'],
+                                                        MaHang: jsonData[i]['Mã hàng'],
+                                                        NgayNhap: jsonData[i]['Ngày xuất'].replace(/\./g, '-'),
+                                                    });
+                                                }
+                                            }
+                                        }
+                                        $('#preloader').fadeOut();
+                                    });
+                            })
+                            .catch(error => console.error(error));
+                    }
+                    else {
+                        for (let i = 0; i < jsonData.length; i++) {
+                            for (let j = 0; j < CurrentThis.DanhSachThanhPham.length; j++) {
+                                let datajson = CurrentThis.removeAccents(jsonData[i]['Tên thành phẩm']).trim().toLowerCase();
+                                let dataApi = CurrentThis.removeAccents(CurrentThis.DanhSachThanhPham[j]['TenThanhPham']).trim().toLowerCase();
+                                if (datajson == dataApi) {
+                                    CurrentThis.ThanhPhamNhapKho.push({
+                                        Id: 0,
+                                        Cancelled: false,
+                                        IDThanhPham: CurrentThis.DanhSachThanhPham[j]['Id'],
+                                        SoLuong: jsonData[i]['Số Lượng'],
+                                        DonGia: jsonData[i]['Đơn Giá'],
+                                        IDPhieu: 0,
+                                        PO: jsonData[i]['PO'],
+                                        Size: jsonData[i]['Size'],
+                                        Mau: jsonData[i]['Màu sắc'],
+                                        KhachHang: jsonData[i]['Khách hàng'],
+                                        MaHang: jsonData[i]['Mã hàng'],
+                                        NgayNhap: jsonData[i]['Ngày xuất'].replace(/\./g, '-'),
+                                    });
+                                }
+                            }
+                        }
+                        $('#preloader').fadeOut();
+                    }
+
+                }
+
+                reader.readAsBinaryString(file);
+            },
+
+            donwloadTemplate() {
+                $('#preloader').fadeIn();
+                const fileUrl = '/upload/excel/TemplatePhieuXuat.xlsx';
+                const link = $('<a>', {
+                    href: fileUrl,
+                    download: 'TemplatePhieuXuat.xlsx'
+                }).appendTo('body');
+                link[0].click();
+                link.remove();
+                $('#preloader').fadeOut();
+            },
+            PhuongThucNhap: function (val) {
+                if(val == 1){
+                    this.isImportExcel = false;
+                }
+                else{
+                    this.isImportExcel = true;
+
+                }
+            },
+            removeAccents(str) {
+                var AccentsMap = [
+                    "aàảãáạăằẳẵắặâầẩẫấậ",
+                    "AÀẢÃÁẠĂẰẲẴẮẶÂẦẨẪẤẬ",
+                    "dđ", "DĐ",
+                    "eèẻẽéẹêềểễếệ",
+                    "EÈẺẼÉẸÊỀỂỄẾỆ",
+                    "iìỉĩíị",
+                    "IÌỈĨÍỊ",
+                    "oòỏõóọôồổỗốộơờởỡớợ",
+                    "OÒỎÕÓỌÔỒỔỖỐỘƠỜỞỠỚỢ",
+                    "uùủũúụưừửữứự",
+                    "UÙỦŨÚỤƯỪỬỮỨỰ",
+                    "yỳỷỹýỵ",
+                    "YỲỶỸÝỴ"
+                ];
+                for (var i = 0; i < AccentsMap.length; i++) {
+                    var re = new RegExp('[' + AccentsMap[i].substr(1) + ']', 'g');
+                    var char = AccentsMap[i][0];
+                    if (str != undefined) {
+                        str = str.toString().replace(re, char);
+                    }
+                    else {
+                        continue;
+                    }
+                }
+                return str;
+            },
+            Xoa: function (index) {
+                if (this.ThanhPhamNhapKho.filter(item => item.Cancelled == false).length > 1) {
+                    this.ThanhPhamNhapKho[index].Cancelled = true
+                }
+                if (this.ThanhPhamNhapKho[index].Cancelled == true && this.ThanhPhamNhapKho[index].Id == 0) {
+                    this.ThanhPhamNhapKho.splice(index, 1);
+                }
+
+            },
+        }
+    });
+
+
+</script>

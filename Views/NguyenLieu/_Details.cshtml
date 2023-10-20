@@ -1,0 +1,114 @@
+@model AMS.Models.NguyenLieuViewModel.NguyenLieuCRUDViewModel
+<div id="detail_nguyen_lieu_vue">
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-bordered table-striped">
+                <tr>
+                    <th>Ngày tạo</th>
+                    <td>@Model.CreatedDate</td>
+                </tr>
+                <tr>
+                    <th>Ngày sửa cuối</th>
+                    <td>@Model.ModifiedDate</td>
+                </tr>
+                <tr>
+                    <th>Người tạo</th>
+                    <td>@Model.CreatedBy</td>
+                </tr>
+                <tr>
+                    <th>Người sửa cuối</th>
+                    <td>@Model.ModifiedBy</td>
+                </tr>
+                <tr>
+                    <th>Mã QR nguyên liệu</th>
+                    <td><a id="downloadLink" download="QR.png"> <div id="qrcode"></div></a></td>
+                </tr>
+            </table>
+        </div>
+        <div class="col-md-12">
+            <table class="table">
+                <thead class="table-primary">
+                    <tr>
+                        <td>STT</td>
+                        <td>Màu sắc</td>
+                        <td>Size</td>
+                        <td>Số lượng</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(item, index) in listData">
+                        <td>{{index+1}}</td>
+                        <td>{{item.color}}</td>
+                        <td>{{item.size}}</td>
+                        <td>{{item.quantity}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
+<script type="text/javascript">
+    var detail_nguyen_lieu_vue = new Vue({
+        el: "#detail_nguyen_lieu_vue",
+        data: {
+            nguyenLieuId: @Html.Raw(@Model.Id),
+            CustomFieldInputValue: [],
+            CustomFieldTotal: []
+        },
+        mounted() {
+            this.initQrCode();
+            this.initData();
+
+        },
+        computed: {
+            listData(){
+                return this.CustomFieldTotal.map((item, index) => {
+                    return {
+                        color: this.CustomFieldInputValue.filter(i => i.Id == item.LisCustom[0])[0].CustomFieldValue,
+                        size: this.CustomFieldInputValue.filter(i => i.Id == item.LisCustom[1])[0].CustomFieldValue,
+                        quantity: item.Quantity
+                    }
+                });
+            }
+        },
+        methods: {
+            initQrCode() {
+                var baseUrl = window.location.protocol + "//" + window.location.host;
+                const qrcode = new QRCode(document.getElementById('qrcode'), {
+                    text: `${baseUrl}/Nguyenlieu/ChiTiet?id=${@Model.Id}`,
+                    width: 128,
+                    height: 128,
+                    colorDark: '#000',
+                    colorLight: '#fff',
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+                const downloadLink = document.getElementById('downloadLink');
+                downloadLink.addEventListener('click', function () {
+                    const qrcodeCanvas = document.querySelector('#qrcode canvas');
+                    const qrCodeDataUrl = qrcodeCanvas.toDataURL('image/png');
+                    downloadLink.href = qrCodeDataUrl;
+                });
+            },
+            initData() {
+                fetch("/NguyenLieu/CustomValue")
+                    .then(res => res.json())
+                    .then(data => this.CustomFieldInputValue = data);
+
+                fetch("/NguyenLieu/CustomValueTotalByNlId?nlId=" + this.nguyenLieuId)
+                    .then(res => res.json())
+                    .then(data => {
+                        this.CustomFieldTotal = data.map((item, index)=>{
+                            return {
+                                Id: item.Id,
+                                NguyenLieuId: item.NguyenLieuId,
+                                LisCustom: JSON.parse(item.LisCustom),
+                                Quantity: item.Quantity
+                            }
+                        });
+                        console.log("CustomFieldTotal", this.CustomFieldTotal)
+                    });
+            }
+        }
+    })
+</script>

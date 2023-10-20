@@ -1,0 +1,137 @@
+@model AMS.Models.QuanLyNguoiDungViewModel.QuanLyNguoiDungCRUDViewModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+<link rel="stylesheet" href="~/css/views/QuanLyNguoiDung/EditQuanLyNguoiDung.css" />
+<div id="AppQuanLyNguoiDung" class="view-add-edit view-edit-QuanLyNguoiDung">
+    <div class="row">
+        <div class="col-md-12">
+            <form id="frmQuanLyNguoiDung">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="CreatedDate" />
+                <input type="hidden" asp-for="CreatedBy" />
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label asp-for="HoVaTen" class="control-label"></label>
+                            <input asp-for="HoVaTen" class="form-control" />
+                            <span asp-validation-for="HoVaTen" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="AnhDaiDien" class="col-sm-12 control-label"></label>
+                            <div class="col-sm-12">
+                                <div class="image-thumb" id="AnhDaiDien" @@click="$refs.AnhDaiDien.click()">
+                                    <img class="image-thumb-upload" src="/images/DefaultAsset/upload.png" />
+                                </div>
+                                <input asp-for="AnhDaiDien" type="file" ref="AnhDaiDien" accept="image/*" v-on:change="fileSelected($event,'AnhDaiDien')" enctype="multipart/form-data" style="display:none" />
+                            </div>
+
+                            <span asp-validation-for="AnhDaiDien" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="SoDienThoai" class="control-label"></label>
+                            <input asp-for="SoDienThoai" class="form-control" />
+                            <span asp-validation-for="SoDienThoai" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="TaiKhoan" class="control-label"></label>
+                            <input asp-for="TaiKhoan" class="form-control" />
+                            <span asp-validation-for="TaiKhoan" class="text-danger"></span>
+                        </div>
+                        <div class="form-group row">
+                            <label asp-for="QuanLyNhomNguoiDungId" class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <select asp-for="QuanLyNhomNguoiDungId" asp-items="@ViewBag._LoadQuanLyNhomNguoiDung"
+                                        id="QuanLyNhomNguoiDungId" class="form-control" style="width:100%;">
+                                    <option disabled selected>--- SELECT ---</option>
+                                </select>
+                                <span asp-validation-for="QuanLyNhomNguoiDungId" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="NgayThem" class="control-label"></label>
+                            <input asp-for="NgayThem" class="form-control" />
+                            <span asp-validation-for="NgayThem" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="ChucVu" class="control-label"></label>
+                            <input asp-for="ChucVu" class="form-control" />
+                            <span asp-validation-for="ChucVu" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <input type="button" id="btnSave" value="Lưu" onclick="Save()" class="btn btn-info">
+                    <button type="button" id="btnClose" class="btn btn-danger" data-dismiss="modal">Đóng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
+<script type="text/javascript">
+    AppQuanLyNguoiDung = new Vue({
+        el: '#AppQuanLyNguoiDung',
+        mounted() {
+            this.init();
+        },
+        data: {
+            Id: @Html.Raw(@Model.Id),
+            HoVaTen: "@Html.Raw(@Model.HoVaTen)",
+            AnhDaiDien: "@Html.Raw(@Model.AnhDaiDien)",
+            SoDienThoai: "@Html.Raw(@Model.SoDienThoai)",
+            TaiKhoan: "@Html.Raw(@Model.TaiKhoan)",
+            QuanLyNhomNguoiDungId: @Html.Raw(@Model.QuanLyNhomNguoiDungId),
+            NgayThem: "@Html.Raw(@Model.NgayThem)",
+            ChucVu: "@Html.Raw(@Model.ChucVu)",
+            images: new Map(),
+            previewImageThumb: "/images/DefaultAsset/image_thumb.png",
+            previewImage: null
+        },
+        computed: {
+
+
+
+
+        },
+        methods: {
+            fileSelected(evt, previewImage) {
+                evt.preventDefault()
+                const reader = new FileReader();
+                reader.readAsDataURL(evt.target.files[0]);
+                reader.onload = e => {
+                    document.getElementById(previewImage).style.backgroundImage = `url('${e.target.result}')`;
+                };
+                this.images.set(previewImage, evt.target.files[0]);
+            },
+            demo_func: function () {
+
+            },
+            init: function () {
+
+            },
+            makeid: function (length) {
+                let result = '';
+                const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                const charactersLength = characters.length;
+                let counter = 0;
+                while (counter < length) {
+                    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+                    counter += 1;
+                }
+                return result;
+            },
+
+
+
+
+
+
+        }
+    });
+
+
+</script>

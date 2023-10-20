@@ -1,0 +1,124 @@
+@model AMS.Models.QuanLyMenuViewModel.QuanLyMenuCRUDViewModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<div id="appMenuItem">
+    <div class="row">
+        <div class="col-md-12">
+            <form id="frmQuanLyMenu">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="CreatedDate" />
+                <input type="hidden" asp-for="CreatedBy" />
+                <div class="form-group">
+                    <label asp-for="Name" class="control-label"></label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Parameter" class="control-label"></label>
+                    <input asp-for="Parameter" class="form-control" />
+                    <span asp-validation-for="Parameter" class="text-danger"></span>
+                </div>
+                <div class="form-group row">
+                    <label asp-for="ParentId" class="col-sm-3 col-form-label"></label>
+                    <div class="col-sm-9">
+                        <select asp-for="ParentId" asp-items="@ViewBag._LoadQuanLyMenu"
+                                id="ParentId" class="form-control" style="width:100%;">
+                            <option disabled selected>--- SELECT ---</option>
+                        </select>
+                        <span asp-validation-for="ParentId" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label asp-for="Icon" class="col-sm-12 col-form-label"></label>
+                    <div class="col-sm-12">
+                        <div class="list-icon">
+                            <div>
+                                <div v-for="(item,index) in ListIcon" :class="{active:icon==item}"><i v-on:click="SelectIcon($event,index)" :class="'fas '+item"></i></div>
+                            </div>
+                        </div>
+                        <input type="hidden" asp-for="Icon" />
+                        <span asp-validation-for="Icon" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label asp-for="CreateObjectId" class="col-sm-3 col-form-label"></label>
+                    <div class="col-sm-9">
+                        <select asp-for="CreateObjectId" onchange="getViewConfig()" asp-items="@ViewBag._LoadObjectView"
+                                id="CreateObjectId" class="form-control" style="width:100%;">
+                            <option value="0">Vui lòng chọn view</option>
+                        </select>
+                        <span asp-validation-for="CreateObjectId" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label asp-for="Task" class="col-sm-3 col-form-label"></label>
+                    <div class="col-sm-9">
+                        <select asp-for="Task" asp-items="@ViewBag._LoadTask"
+                                id="Task" class="form-control" style="width:100%;">
+                        </select>
+                        <span asp-validation-for="Task" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label asp-for="DevelopmentEnvironment" class="control-label"></label>
+                    <input asp-for="DevelopmentEnvironment" class="form-control" />
+                    <span asp-validation-for="DevelopmentEnvironment" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Description" class="control-label"></label>
+                    <input asp-for="Description" class="form-control" />
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <input type="button" id="btnSave" value="Lưu" onclick="Save()" class="btn btn-info">
+                    <button type="button" id="btnClose" class="btn btn-danger" data-dismiss="modal">Đóng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
+<script type="text/javascript">
+    appMenuItem = new Vue({
+        el: '#appMenuItem',
+        mounted() {
+            this.init();
+        },
+        data: {
+            ListIcon: @Html.Raw(ViewBag.ListIcon),
+            images: new Map(),
+            previewImageThumb: "/images/DefaultAsset/image_thumb.png",
+            previewImage: null,
+            icon: '@Model.Icon'
+        },
+        computed: {
+
+
+
+
+        },
+        methods: {
+           
+            demo_func: function () {
+
+            },
+            init: function () {
+
+            },
+            SelectIcon: function (event, index) {
+
+                this.icon = this.ListIcon[index];
+                $('input[name="Icon"]').val(this.icon);
+            }
+
+
+
+        }
+    });
+
+
+</script>

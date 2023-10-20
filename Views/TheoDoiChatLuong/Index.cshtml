@@ -1,0 +1,211 @@
+<link rel="stylesheet" href="~/css/views/TheoDoiChatLuong/IndexTheoDoiChatLuong.css" />
+
+<div class="wrapper view-index-TheoDoiChatLuong">
+    <div class="panel panel-hash">
+        <div class="panel-heading">
+            <br />
+            <div class="top_content_heading">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="pull-left page-title">
+                            <h3>Theo dõi chất lượng</h3>
+                        </div>
+                        <div class="pull-right controlls">
+                            <a href="javascript:void(0)" onclick="AddEdit(0)">
+                                <div class="info-box">
+                                    <span class="info-box-icon bg-success elevation-1"><i class="fas fa-plus-square"></i></span>
+                                    <div class="info-box-content">
+                                        <span class="info-box-number">
+                                            Thêm
+                                        </span>
+                                    </div>
+                                </div>
+                            </a>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-body scroll panel-height">
+            <table id="tblTheoDoiChatLuong" class="table table-striped table-hover" style="width:100%">
+                <thead class="bg-secondary">
+                    <tr>
+                        <th>Xem</th>
+                        <th>Tên nguyên liệu</th>
+                        <th>Đánh giá chất lượng</th>
+                        <th>Ghi chú về chất lượng</th>
+                        <th>Ngày tạo</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+
+        <div id="ThongBao">
+            <h3 class="text-center">Thông báo về chất lượng</h3>
+
+            <table class="table table-bordered" id="ThongBaoTable">
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Tên nguyên liệu</th>
+                        <th>Thông báo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(message, index) in filteredMessages" :key="index">
+                        <td>
+                            {{ (currentPage - 1) * itemsPerPage + index + 1 }}
+                        </td>
+                        <td>
+                            {{ message.TenNguyenLieu }}
+                        </td>
+                        <td>
+                            {{ message.DanhGia }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="pagination-container">
+                <input type="text" placeholder="Tìm kiếm..." v-model="searchKeyword">
+
+                <ul class="pagination-list">
+                    <li v-for="page in totalPages" :key="page">
+                        <button v-on:click="currentPage = page" class="pagination-button">{{ page }}</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .panel-heading {
+        padding: 0px 0px 0px 5px;
+    }
+
+    .panel-body {
+        padding: 5px;
+    }
+
+    .h4 {
+        margin-top: 1px;
+        margin-bottom: 1px;
+    }
+
+   
+</style>
+<script src="~/js/TheoDoiChatLuong/TheoDoiChatLuong_CRUD.js"></script>
+<script src="~/js/TheoDoiChatLuong/TheoDoiChatLuong_Datatable.js"></script>
+
+<script type="text/javascript">
+    ThongBao = new Vue({
+        el: '#ThongBao',
+        data: {
+            thongBao: [],
+            message: [],
+            searchKeyword: "",
+            currentPage: 1,
+            itemsPerPage: 10
+        },
+        mounted() {
+            this.init();
+
+        },
+        computed: {
+            filteredMessages() {
+                var curent = this;
+                const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+                const endIndex = startIndex + this.itemsPerPage;
+
+                return this.message.filter((message) => {
+                    return message.TenNguyenLieu.toLowerCase().includes(curent.searchKeyword.toLowerCase());
+                }).slice(startIndex, endIndex);
+            },
+            totalPages() {
+                return Math.ceil(this.filteredMessages.length / this.itemsPerPage);
+            }
+        },
+        methods: {
+            removeDiacritics(text) {
+                return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            },
+            init() {
+                fetch("/TheoDoiChatLuong/GetApiDanhGia")
+                    .then(res => res.json())
+                    .then(data => {
+                        this.thongBao = data;
+                        this.compareValues();
+                    });
+            },
+            compareValues() {
+                if (this.thongBao.length > 0) {
+                    for (let i = 1; i < this.thongBao.length; i++) {
+                        const latestRecord = this.thongBao[i];
+                        const previousRecord = this.thongBao[i - 1];
+
+                        if (latestRecord.TenNguyenLieuId === previousRecord.TenNguyenLieuId) {
+                            if (latestRecord.ChatLuongDrop > previousRecord.ChatLuongDrop) {
+                                const messages = {
+                                    TenNguyenLieu: latestRecord.TenNguyenLieu,
+                                    DanhGia: `Đánh giá tốt hơn của ngày ${this.formatDateTime(latestRecord.CreatedDate)} so với ngày ${this.formatDateTime(previousRecord.CreatedDate)}.`,
+                                };
+                                this.message.push(messages);
+                            } else if (latestRecord.ChatLuongDrop < previousRecord.ChatLuongDrop) {
+                                const messages = {
+                                    TenNguyenLieu: latestRecord.TenNguyenLieu,
+                                    DanhGia: `Đánh giá kém hơn của ngày ${this.formatDateTime(latestRecord.CreatedDate)} so với ngày ${this.formatDateTime(previousRecord.CreatedDate)}.`,
+                                };
+                                this.message.push(messages);
+                            }
+                        }
+                    }
+                }
+            },
+            formatDateTime(dateTime) {
+                const date = new Date(dateTime);
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+
+                return `${day}/${month}/${year} ${hours}h:${minutes}`;
+            },
+            removeAccents(str) {
+                var AccentsMap = [
+                    ['a', 'à', 'ả', 'ã', 'á', 'ạ', 'ă', 'ằ', 'ẳ', 'ẵ', 'ắ', 'ặ', 'â', 'ầ', 'ẩ', 'ẫ', 'ấ', 'ậ'],
+                    ['A', 'À', 'Ả', 'Ã', 'Á', 'Ạ', 'Ă', 'Ằ', 'Ẳ', 'Ẵ', 'Ắ', 'Ặ', 'Â', 'Ầ', 'Ẩ', 'Ẫ', 'Ấ', 'Ậ'],
+                    ['d', 'đ'],
+                    ['D', 'Đ'],
+                    ['e', 'è', 'ẻ', 'ẽ', 'é', 'ẹ', 'ê', 'ề', 'ể', 'ễ', 'ế', 'ệ'],
+                    ['E', 'È', 'Ẻ', 'Ẽ', 'É', 'Ẹ', 'Ê', 'Ề', 'Ể', 'Ễ', 'Ế', 'Ệ'],
+                    ['i', 'ì', 'ỉ', 'ĩ', 'í', 'ị'],
+                    ['I', 'Ì', 'Ỉ', 'Ĩ', 'Í', 'Ị'],
+                    ['o', 'ò', 'ỏ', 'õ', 'ó', 'ọ', 'ô', 'ồ', 'ổ', 'ỗ', 'ố', 'ộ', 'ơ', 'ờ', 'ở', 'ỡ', 'ớ', 'ợ'],
+                    ['O', 'Ò', 'Ỏ', 'Õ', 'Ó', 'Ọ', 'Ô', 'Ồ', 'Ổ', 'Ỗ', 'Ố', 'Ộ', 'Ơ', 'Ờ', 'Ở', 'Ỡ', 'Ớ', 'Ợ'],
+                    ['u', 'ù', 'ủ', 'ũ', 'ú', 'ụ', 'ưừ', 'ử', 'ữ', 'ứ', 'ự'],
+                    ['U', 'Ù', 'Ủ', 'Ũ', 'Ú', 'Ụ', 'Ư', 'Ừ', 'Ử', 'Ữ', 'Ứ', 'Ự'],
+                    ['y', 'ỳ', 'ỷ', 'ỹ', 'ý', 'ỵ'],
+                    ['Y', 'Ỳ', 'Ỷ', 'Ỹ', 'Ý', 'Ỵ']
+                ];
+
+                for (var i = 0; i < AccentsMap.length; i++) {
+                    for (var j = 1; j < AccentsMap[i].length; j++) {
+                        var char = AccentsMap[i][j];
+                        str = str.replace(new RegExp(char, 'g'), AccentsMap[i][0]);
+                    }
+                }
+
+                return str;
+            },
+            
+
+        },
+    });
+
+</script>

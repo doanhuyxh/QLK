@@ -1,0 +1,26 @@
+@model AMS.Models.KeHoachSanXuatViewModel.KeHoachSanXuatCRUDViewModel
+<link rel="stylesheet" href="~/css/views/KeHoachSanXuat/DetailKeHoachSanXuat.css" />
+<div cite="view-detail-KeHoachSanXuat">
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-bordered table-striped">
+                <tr>
+                    <th>Ngày tạo</th>
+                    <td>@Model.CreatedDate</td>
+                </tr>
+                <tr>
+                    <th>Ngày sửa cuối</th>
+                    <td>@Model.ModifiedDate</td>
+                </tr>
+                <tr>
+                    <th>Người tạo</th>
+                    <td>@Model.CreatedBy</td>
+                </tr>
+                <tr>
+                    <th>Người sửa cuối</th>
+                    <td>@Model.ModifiedBy</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>

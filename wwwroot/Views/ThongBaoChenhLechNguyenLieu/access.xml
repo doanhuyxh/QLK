@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<access view="ThongBaoChenhLechNguyenLieu">
+	<section name="ThongBaoChenhLechNguyenLieu">
+		<action
+			name="list"
+			description="Xem cảnh báo"
+			title="Xem cảnh báo"
+		/>
+	</section>
+</access>

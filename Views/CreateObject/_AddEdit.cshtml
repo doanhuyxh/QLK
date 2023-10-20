@@ -1,0 +1,1839 @@
+@model AMS.Models.CreateObjectViewModel.CreateObjectCRUDViewModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+<link rel="stylesheet" href="~/wwwroot/css/views/CreateObject.min.css">
+<div class="main-test">
+    <template id="report-template">
+        <div class="row">
+            <div class="col-md-9">
+                <div v-for="(row,RowIndex) in listRows" class="row build-form-1">
+                    <div class="row-controller">
+                        <div class="item-controller add-row" @@click="addRowForm($event,row,RowIndex)"><i class="fa fa-fw fa-plus-square"></i></div>
+                        <div v-if="row.columns.length<2" class="item-controller add-column" @@click="addColumnForm($event,row,RowIndex)"><img alt="Thêm cột" src="/images/DefaultAsset/add-column-xxl.png" /></div>
+                        <div v-if="listRows.length>1" class="item-controller remove-row" @@click="removeRowForm($event,row,RowIndex)"><i alt="Xóa dòng" class="fa fa-fw fa-trash"></i></div>
+                    </div>
+                    <div v-for="(column,ColumnIndex) in row.columns" v-bind:class="{ 'col-md-12': (row.columns.length==1),'col-md-6': (row.columns.length==2), 'list-item-build': true }">
+                        <div class="column-controller">
+                            <div class="add-column item-controller" v-if="row.columns.length==1" @@click="addColumnForm($event,row,RowIndex)"><i alt="Thêm cột" class="fa fa-fw fa-plus-square"></i></div>
+                            <div class="remove-column item-controller" @@click="removeColumnForm($event,row,RowIndex,ColumnIndex)"><i alt="Xóa cột" class="fa fa-fw fa-trash"></i></div>
+                        </div>
+                        <div class="wrapper" @@dragover.prevent
+                                @@dragenter.prevent @@drop="onDrop($event,RowIndex, ColumnIndex)" v-sortable="{animation: 250, onUpdate: work}">
+                            <div v-for="(item,itemIndex) in column.ListItem" draggable
+                                    @@dragstart="startDrag($event, item,RowIndex,ColumnIndex,itemIndex)" class="item-html">
+                                <div v-if="item.KieuDuLieu=='dropdown'" class="form-group row">
+                                    <i alt="Xóa" @@click="removeItemForm($event,item,RowIndex,ColumnIndex,itemIndex)" class="fa fa-fw fa-minus-circle delete-item"></i>
+                                    <label for="{{item.TenTruong}}" class="col-sm-3 col-form-label">{{item.Label}}</label>
+                                    <div class="col-sm-9">
+                                        <select for="{{item.TenTruong}}"
+                                                id="{{item.TenTruong}}" class="form-control" style="width:100%;">
+                                            <option disabled selected>--- SELECT {{item.TenTruong}} ---</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div v-if="item.KieuDuLieu=='ParentId'" class="form-group row">
+                                    <i alt="Xóa" @@click="removeItemForm($event,item,RowIndex,ColumnIndex,itemIndex)" class="fa fa-fw fa-minus-circle delete-item"></i>
+                                    <label for="{{item.TenTruong}}" class="col-sm-3 col-form-label">{{item.Label}}</label>
+                                    <div class="col-sm-9">
+                                        <select for="{{item.TenTruong}}"
+                                                id="{{item.TenTruong}}" class="form-control" style="width:100%;">
+                                            <option disabled selected>--- SELECT {{item.TenTruong}} ---</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div v-if="item.KieuDuLieu=='table'" class="form-group row">
+                                    <i alt="Xóa" @@click="removeItemForm($event,item,RowIndex,ColumnIndex,itemIndex)" class="fa fa-fw fa-minus-circle delete-item"></i>
+                                    <label for="{{item.TenTruong}}" class="col-sm-12 col-form-label">{{item.Label}}</label>
+                                    <div class="col-sm-12">
+                                        <table v-if="item.ShowSubItem" class="table table-sub-create-object">
+                                            <thead>
+                                                <tr>
+                                                    <th v-for="(sub_item,sub_index_item) in item.sub_items">{{ sub_item.Label }}</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td v-for="(sub_item,sub_index_item) in item.sub_items">
+                                                        <select v-if="sub_item.KieuDuLieu=='dropdown'"
+                                                                class="form-control" style="width:100%;">
+                                                            <option disabled selected>select value</option>
+                                                        </select>
+                                                        <input v-if="sub_item.KieuDuLieu=='string'" type="text" class="form-control" />
+                                                        <input v-if="sub_item.KieuDuLieu=='bolean'" type="checkbox" class="form-control" />
+                                                        <input v-if="sub_item.date=='date'" type="date" class="form-control" />
+                                                        <input v-if="sub_item.date=='datetime'" type="datetime" class="form-control" />
+                                                        <img v-if="sub_item.date=='image'" class="image-thumb" src="/images/DefaultAsset/image_thumb.png" />
+                                                        <textarea v-if="sub_item.date=='textarea'" class="form-control" style="width:100;height:30px"></textarea>
+                                                    </td>
+
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div v-if="item.KieuDuLieu=='string'" class="form-group row">
+                                    <i alt="Xóa" @@click="removeItemForm($event,item,RowIndex,ColumnIndex,itemIndex)" class="fa fa-fw fa-minus-circle delete-item"></i>
+                                    <label for="{{item.TenTruong}}" class="col-sm-3 col-form-label">{{item.Label}}</label>
+                                    <div class="col-sm-9">
+                                        <input for="{{item.TenTruong}}" class="form-control" />
+                                    </div>
+                                </div>
+                                <div v-if="item.KieuDuLieu=='bolean'" class="form-group row">
+                                    <i alt="Xóa" @@click="removeItemForm($event,item,RowIndex,ColumnIndex,itemIndex)" class="fa fa-fw fa-minus-circle delete-item"></i>
+                                    <label for="{{item.TenTruong}}" class="col-sm-3 col-form-label">{{item.Label}}</label>
+                                    <div class="col-sm-9">
+                                        <input for="{{item.TenTruong}}" type="checkbox" class="form-control" />
+                                    </div>
+                                </div>
+                                <div v-if="item.KieuDuLieu=='date'" class="form-group row">
+                                    <i alt="Xóa" @@click="removeItemForm($event,item,RowIndex,ColumnIndex,itemIndex)" class="fa fa-fw fa-minus-circle delete-item"></i>
+                                    <label for="{{item.TenTruong}}" class="col-sm-3 col-form-label">{{item.Label}}</label>
+                                    <div class="col-sm-9">
+                                        <input for="{{item.TenTruong}}" type="date" class="form-control" />
+                                    </div>
+                                </div>
+                                <div v-if="item.KieuDuLieu=='datetime'" class="form-group row">
+                                    <i alt="Xóa" @@click="removeItemForm($event,item,RowIndex,ColumnIndex,itemIndex)" class="fa fa-fw fa-minus-circle delete-item"></i>
+                                    <label for="{{item.TenTruong}}" class="col-sm-3 col-form-label">{{item.Label}}</label>
+                                    <div class="col-sm-9">
+                                        <input for="{{item.TenTruong}}" type="datetime" class="form-control" />
+                                    </div>
+                                </div>
+                                <div v-if="item.KieuDuLieu=='image'" class="form-group row">
+                                    <i alt="Xóa" @@click="removeItemForm($event,item,RowIndex,ColumnIndex,itemIndex)" class="fa fa-fw fa-minus-circle delete-item"></i>
+                                    <label for="{{item.TenTruong}}" class="col-sm-12 col-form-label">{{item.Label}}</label>
+                                    <div class="col-sm-12">
+                                        <img class="image-thumb" src="/images/DefaultAsset/image_thumb.png" />
+                                    </div>
+                                </div>
+                                <div v-if="item.KieuDuLieu=='textarea'" class="form-group row">
+                                    <i alt="Xóa" @@click="removeItemForm($event,item,RowIndex,ColumnIndex,itemIndex)" class="fa fa-fw fa-minus-circle delete-item"></i>
+                                    <label for="{{item.TenTruong}}" class="col-sm-3 col-form-label">{{item.Label}}</label>
+                                    <div class="col-sm-9">
+                                        <textarea for="{{item.TenTruong}}" class="form-control" style="width:100;height:30px"></textarea>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="list-item" @@drop="onDrop($event, -1,-1)"
+                        @@dragover.prevent
+                        @@dragenter.prevent v-sortable="{animation: 250, onUpdate: work}">
+                    <div v-for="(item,index) in ListViewTemplate" draggable
+                            @@dragstart="startDrag($event, item,-1,-1,-1)" class="btn btn-block bg-gradient-success btn-flat item-html">
+                        {{item.Label}}
+                    </div>
+                </div>
+                <button type="button" class="btn btn-block bg-gradient-success btn-flat item-html">H3</button>
+                <button type="button" class="btn btn-block bg-gradient-success btn-flat item-html">Line</button>
+            </div>
+
+        </div>
+    </template>
+    <div id="AppCreateView">
+        <div class="row">
+            <div class="col-md-12">
+                <form id="frmCreateObject">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="CreatedDate" />
+                    <input type="hidden" asp-for="CreatedBy" />
+                    <div class="form-group">
+                        <label asp-for="Label" class="control-label"></label>
+                        <input asp-for="Label" v-on:keyup="changeLabelView()" v-model="Label" class="form-control" />
+                        <span asp-validation-for="Label" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Name" class="control-label"></label>
+                        <input asp-for="Name" readonly v-model="Name" class="form-control" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                    <div class="form-group row">
+                        <label asp-for="CreateObjectId" class="col-sm-3 col-form-label"></label>
+                        <div class="col-sm-9">
+                            <select asp-for="CreateObjectId" asp-items="@ViewBag._LoadObjectView" v-model="CreateObjectId" v-on:change="ChangeViewTemplate()"
+                                    id="CreateObjectId" class="form-control" style="width:100%;">
+                                <option disabled selected>--- Vui lòng chọn ---</option>
+                            </select>
+                            <span asp-validation-for="CreateObjectId" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="card card-primary card-outline card-tabs">
+                        <div class="card-header p-0 pt-1 border-bottom-0">
+                            <ul class="nav nav-tabs" id="custom-tabs-three-tab" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="BasicInfo" data-toggle="pill" href="#divBasicInfo" role="tab" aria-controls="BasicInfo" aria-selected="true">Fiels</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="OtherInfo" data-toggle="pill" href="#divOtherInfo" role="tab" aria-controls="OtherInfo" aria-selected="true">Build form</a>
+                                </li>
+                                 <li class="nav-item">
+                                    <a class="nav-link" id="Report" data-toggle="pill" href="#divReport" role="tab" aria-controls="Report" aria-selected="true">Report</a>
+                                </li>
+
+                            </ul>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="tab-content" id="tabContent">
+                                <div class="tab-pane fade show active" id="divBasicInfo" role="tabpanel" aria-labelledby="divBasicInfo">
+                                    Hướng dẫn <a href="javascript:void(0)" v-on:click="MoRongHuongDanThemTruong()"><span v-if="ShowMoRongHuongDanThemTruong">Thu gọn</span><span v-if="!ShowMoRongHuongDanThemTruong">Mở rộng</span></a>
+                                    <div v-if="ShowMoRongHuongDanThemTruong">
+                                        <h4>Chú ý 1: Bạn cần cân nhắc nhắc khi thêm các trường, tránh việc phải tạo mới view, khiến cho code cũ sẽ bị mất, sau khu lưu nhớ thực hiện việc format code nhé</h4>
+                                        <h4>Chú ý 2: Khi tạo ra các view thì có một số trường mặc định đã có sẵn rồi bạn không cần phải thêm vào. các trường có sẵn là Id,create_date,modifi_date...</h4>
+                                        <ul>
+                                            <li><b>String</b>: được dùng cho các trường dạng text, bạn nên cân nhắc việc thêm độ dài của trường, tránh tình trạng yêu cầu trường nhận ngắn và để quá dài độ dài trường, gây ra lãng phí bộ nhớ</li>
+                                            <li><b>dropdown</b>: Được dùng trong các trường hợp là khóa phụ của một bảng khác[Chú là bảng khác bạn phải tạo trước khi tạo view này]</li>
+                                            <li><b>Double</b>:Được dùng với các số lớn</li>
+                                            <li><b>Int</b>:Được dùng với các số nhỏ</li>
+                                            <li><b>Bolean</b>:Được dùng cho kiểu yes/no</li>
+                                            <li><b>Textarea</b>:Được dùng cho các kiểu chuỗi nhập vào dài, cần xuống nhiều dòng</li>
+                                            <li><b>Image</b>:Được dùng cho các trường ảnh</li>
+                                            <li><b>Library</b>:Được dùng cho các trường mà yêu cầu nhập nhiều ảnh(Đang hoàn thiện tính năng, tạm thời chưa được sử dụng)</li>
+                                            <li><b>ParentId</b>:Được dùng trong trường hợp bảng này có nhiều cấp dạng cha con</li>
+                                            <li><b>Editor</b>:Được dùng cho các trường text và nội dụng cho phép hiển thị trên trình soạn thảo (Đang hoàn thiện tính năng,tạm thời chưa được sử dụng)</li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <table class="table table-create-object">
+                                                <thead>
+                                                    <tr>
+                                                        <th>STT</th>
+                                                        <th>Kiểu dữ liệu</th>
+                                                        <th></th>
+                                                        <th></th>
+                                                        <th>Label</th>
+                                                        <th>Tên trường</th>
+                                                        <th>Độ lớn</th>
+                                                        <th>Hiển thị trong bảng</th>
+                                                        <th>Bắt buộc nhập</th>
+                                                        <th></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <template v-for="(item,index) in items">
+                                                        <tr class="tr-1">
+                                                            <td>{{index+1}}</td>
+                                                            <td>
+                                                                <select :disabled="item.Id>0" style="width:150px" class="form-control select-KieuDuLieu" v-model="item.KieuDuLieu" v-on:change="ThayDoiKieuDuLieu($event,index)">
+                                                                    <option>Chọn kiể
+                                                                        u dữ liệu</option>
+                                                                    <option v-for="type in ListKieuDuLieu" v-bind:value="type">{{ type }}</option>
+                                                                </select>
+                                                            </td>
+                                                            <td><i v-if="index>0" v-on:click="MoveUp($event,index)" class="fas fa-long-arrow-alt-up move"></i></td>
+                                                            <td><i v-if="index<items.length-1" v-on:click="MoveDown($event,index)" class="fas fa-long-arrow-alt-down move"></i></td>
+                                                            <td>
+                                                                <input v-model="item.Label" placeholder="Nhập tên trường bằng tiếng việt" v-on:keyup="changeLabel($event,index)" v-on:keypress="CheckInputLabel($event,index)" style="width:250px" type="text" class="form-control input-Label" />
+                                                            </td>
+                                                            <td style="width:300px">
+                                                                <select v-if="item.KieuDuLieu=='dropdown'" style="width:200px" class="form-control select-table" v-model="item.TenTruong" v-on:change="ChangeTableName($event,index)">
+                                                                    <option>Chọn bảng</option>
+                                                                    <option v-for="(fields,table) in ListTables" v-bind:value="table">{{ table }}</option>
+                                                                </select>
+                                                                <input v-if="item.KieuDuLieu!='dropdown'" v-model="item.TenTruong" readonly style="width:200px" type="text" class="form-control input-TenTruong" />
+                                                                <div v-if="item.KieuDuLieu=='dropdown'" class="tag-field">
+                                                                    <label v-for="(itemField,index_field) in item.ListFieds" class="container">
+                                                                        ({{index_field+1}}){{itemField.Key}}
+                                                                        <input v-model="item.ListFieds[index_field].Value" :disabled="itemField.KieuDuLieu=='table'" type="checkbox" v-bind:value="false">
+                                                                        <span class="checkmark"></span>
+                                                                    </label>
+                                                                    <br/>
+
+                                                                </div>
+                                                                <div v-if="item.KieuDuLieu=='ParentId'" class="tag-field">
+                                                                    <label v-for="(itemField,index_field) in item.ListFieds" class="container">
+                                                                        ({{index_field+1}}){{itemField.Key}}
+                                                                        <input v-model="item.ListFieds[index_field].Value" :disabled="itemField.KieuDuLieu=='table'" type="checkbox" v-bind:value="false">
+                                                                        <span class="checkmark"></span>
+                                                                    </label>
+                                                                    <br />
+
+                                                                </div>
+                                                            </td>
+
+                                                            <td><input v-model="item.DoLon" style="width:70px" :disabled="['Double','Int','Float','string'].indexOf(item.KieuDuLieu)==-1 " type="number" class="form-control  input-DoLon" /></td>
+                                                            <td><input v-model="item.HienThiTrongBang" type="checkbox" :disabled="item.KieuDuLieu=='ParentId'" class="form-control  input-HienThiTrongBang" /></td>
+                                                            <td><input v-model="item.BatBuocNhap" type="checkbox" :disabled="item.KieuDuLieu=='ParentId'" class="form-control  input-BatBuocNhap" /></td>
+                                                            <td><button class="btn btn-warning" type="button" v-on:click="Xoa(index)">Xoá</button></td>
+                                                        </tr>
+                                                        
+                                                        <tr :class="'tr-2-'+index" v-if="item.KieuDuLieu=='table'">
+                                                            <td colspan="9">
+                                                                <label>Tên Bảng con</label>
+                                                                <div class="input-group mb-3">
+                                                                    <input type="text" class="form-control table-name" v-on:keyup="ChangeLabelTableName($event,index)" v-model="item.LabelTenBang" :disabled="item.Id>0">
+                                                                    <div class="input-group-append">
+                                                                        <span class="input-group-text">{{item.TenBang}}</span>
+                                                                    </div>
+                                                                </div>
+                                                                <a href="javascript:void(0)" v-on:click="MoRongSubItem($event,index)"><span v-if="item.ShowSubItem">Thu gọn</span><span v-if="!item.ShowSubItem">Mở rộng</span></a>
+                                                                <table v-if="item.ShowSubItem" class="table table-sub-create-object">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th>STT</th>
+                                                                            <th>Kiểu dữ liệu</th>
+                                                                            <th></th>
+                                                                            <th></th>
+                                                                            <th>Label</th>
+                                                                            <th>Tên trường</th>
+                                                                            <th>Độ lớn</th>
+                                                                            <th>Hiển thị trong bảng</th>
+                                                                            <th>Bắt buộc nhập</th>
+                                                                            <th></th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        <tr v-for="(sub_item,sub_index_item) in item.sub_items">
+                                                                            <td>{{sub_index_item+1}}</td>
+                                                                            <td>
+                                                                                <select :disabled="sub_item.Id>0" style="width:150px" class="form-control select-KieuDuLieu" v-model="sub_item.KieuDuLieu" v-on:change="ThayDoiKieuDuLieuSubItem($event,index,sub_index_item)">
+                                                                                    <option>Chọn kiểu dữ liệu</option>
+                                                                                    <option v-for="type in ListKieuDuLieuSubItem" v-bind:value="type">{{ type }}</option>
+                                                                                </select>
+                                                                            </td>
+                                                                            <td><i v-if="sub_index_item>0" v-on:click="MoveUpSubItem($event,index,sub_index_item)" class="fas fa-long-arrow-alt-up move"></i></td>
+                                                                            <td><i v-if="sub_index_item<item.sub_items.length-1" v-on:click="MoveDownSubItem($event,index,sub_index_item)" class="fas fa-long-arrow-alt-down move"></i></td>
+                                                                            <td>
+                                                                                <input v-model="sub_item.Label" placeholder="Nhập tên trường bằng tiếng việt" v-on:keyup="changeLabelSubItem($event,index,sub_index_item)" v-on:keypress="CheckInputLabel($event,sub_index_item)" style="width:250px" type="text" class="form-control input-Label" />
+                                                                            </td>
+                                                                            <td style="width:300px">
+                                                                                <select v-if="sub_item.KieuDuLieu=='dropdown'" style="width:200px" class="form-control select-table" v-model="sub_item.TenTruong" v-on:change="ChangeTableNameSubItem($event,index,sub_index_item)">
+                                                                                    <option>Chọn bảng</option>
+                                                                                    <option v-for="(fields,table) in ListTables" v-bind:value="table">{{ table }}</option>
+                                                                                </select>
+                                                                                <input v-if="sub_item.KieuDuLieu!='dropdown'" v-model="sub_item.TenTruong" readonly style="width:200px" type="text" class="form-control input-TenTruong" />
+                                                                                <div v-if="sub_item.KieuDuLieu=='dropdown' || sub_item.KieuDuLieu=='ParentId'" class="tag-fields">
+                                                                                    <label v-for="(sub_itemField,sub_index_item) in sub_item.ListFieds" class="container">
+                                                                                        {{sub_itemField.Key}}
+                                                                                        <input v-model="sub_item.ListFieds[sub_index_item].Value" type="checkbox"   v-bind:value="sub_itemField.Value">
+                                                                                        <span class="checkmark"></span>
+                                                                                    </label>
+
+                                                                                </div>
+                                                                            </td>
+
+                                                                            <td><input v-model="sub_item.DoLon" style="width:70px" :disabled="['Double','Int','Float','string'].indexOf(sub_item.KieuDuLieu)==-1 " type="number" class="form-control  input-DoLon" /></td>
+                                                                            <td><input v-model="sub_item.HienThiTrongBang" type="checkbox" :disabled="sub_item.KieuDuLieu=='ParentId'" class="form-control  input-HienThiTrongBang" /></td>
+                                                                            <td><input v-model="sub_item.BatBuocNhap" type="checkbox" :disabled="sub_item.KieuDuLieu=='ParentId'" class="form-control  input-BatBuocNhap" /></td>
+                                                                            <td><button class="btn btn-warning" type="button" v-on:click="XoaSubItem($event,index,sub_index_item)">Xoá</button></td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                    <tfoot>
+                                                                        <tr>
+                                                                            <td colspan="9" class="text-right"></td>
+                                                                            <td><button type="button" class="btn btn-info" v-on:click="ThemMoiSubItem($event,index)">Thêm</button></td>
+                                                                        </tr>
+                                                                    </tfoot>
+                                                                </table>
+                                                            </td>
+
+                                                        </tr>
+                                                    </template>
+                                                </tbody>
+                                                <tfoot>
+                                                    <tr>
+                                                        <td colspan="9" class="text-right"></td>
+                                                        <td><button type="button" class="btn btn-primary" v-on:click="ThemMoi()">Thêm</button></td>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade build-form" id="divOtherInfo" role="tabpanel" aria-labelledby="divOtherInfoTab">
+                                    <div class="row">
+                                        <div class="col-md-9">
+                                            <div v-for="(row,RowIndex) in listRows" class="row build-form-1">
+                                                <div class="row-controller">
+                                                    <div class="item-controller add-row" @@click="addRowForm($event,row,RowIndex)"><i class="fa fa-fw fa-plus-square"></i></div>
+                                                    <div v-if="row.columns.length<2" class="item-controller add-column" @@click="addColumnForm($event,row,RowIndex)"><img alt="Thêm cột" src="/images/DefaultAsset/add-column-xxl.png" /></div>
+                                                    <div v-if="listRows.length>1" class="item-controller remove-row" @@click="removeRowForm($event,row,RowIndex)"><i alt="Xóa dòng" class="fa fa-fw fa-trash"></i></div>
+                                                </div>
+                                                <div v-for="(column,ColumnIndex) in row.columns" v-bind:class="{ 'col-md-12': (row.columns.length==1),'col-md-6': (row.columns.length==2), 'list-item-build': true }">
+                                                    <div class="column-controller">
+                                                        <div class="add-column item-controller" v-if="row.columns.length==1" @@click="addColumnForm($event,row,RowIndex)"><i alt="Thêm cột" class="fa fa-fw fa-plus-square"></i></div>
+                                                        <div class="remove-column item-controller" @@click="removeColumnForm($event,row,RowIndex,ColumnIndex)"><i alt="Xóa cột" class="fa fa-fw fa-trash"></i></div>
+                                                    </div>
+                                                    <div class="wrapper" @@dragover.prevent
+                                                         @@dragenter.prevent @@drop="onDrop($event,RowIndex, ColumnIndex)" v-sortable="{animation: 250, onUpdate: work}">
+                                                        <div v-for="(item,itemIndex) in column.ListItem" draggable
+                                                             @@dragstart="startDrag($event, item,RowIndex,ColumnIndex,itemIndex)" class="item-html">
+                                                            <div v-if="item.KieuDuLieu=='dropdown'" class="form-group row">
+                                                                <i alt="Xóa" @@click="removeItemForm($event,item,RowIndex,ColumnIndex,itemIndex)" class="fa fa-fw fa-minus-circle delete-item"></i>
+                                                                <label for="{{item.TenTruong}}" class="col-sm-3 col-form-label">{{item.Label}}</label>
+                                                                <div class="col-sm-9">
+                                                                    <select for="{{item.TenTruong}}"
+                                                                            id="{{item.TenTruong}}" class="form-control" style="width:100%;">
+                                                                        <option disabled selected>--- SELECT {{item.TenTruong}} ---</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div v-if="item.KieuDuLieu=='ParentId'" class="form-group row">
+                                                                <i alt="Xóa" @@click="removeItemForm($event,item,RowIndex,ColumnIndex,itemIndex)" class="fa fa-fw fa-minus-circle delete-item"></i>
+                                                                <label for="{{item.TenTruong}}" class="col-sm-3 col-form-label">{{item.Label}}</label>
+                                                                <div class="col-sm-9">
+                                                                    <select for="{{item.TenTruong}}"
+                                                                            id="{{item.TenTruong}}" class="form-control" style="width:100%;">
+                                                                        <option disabled selected>--- SELECT {{item.TenTruong}} ---</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div v-if="item.KieuDuLieu=='table'" class="form-group row">
+                                                                <i alt="Xóa" @@click="removeItemForm($event,item,RowIndex,ColumnIndex,itemIndex)" class="fa fa-fw fa-minus-circle delete-item"></i>
+                                                                <label for="{{item.TenTruong}}" class="col-sm-12 col-form-label">{{item.Label}}</label>
+                                                                <div class="col-sm-12">
+                                                                    <table v-if="item.ShowSubItem" class="table table-sub-create-object">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th v-for="(sub_item,sub_index_item) in item.sub_items">{{ sub_item.Label }}</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <tr>
+                                                                                <td v-for="(sub_item,sub_index_item) in item.sub_items">
+                                                                                    <select v-if="sub_item.KieuDuLieu=='dropdown'"
+                                                                                            class="form-control" style="width:100%;">
+                                                                                        <option disabled selected>select value</option>
+                                                                                    </select>
+                                                                                    <input v-if="sub_item.KieuDuLieu=='string'" type="text" class="form-control" />
+                                                                                    <input v-if="sub_item.KieuDuLieu=='bolean'" type="checkbox" class="form-control" />
+                                                                                    <input v-if="sub_item.date=='date'" type="date" class="form-control" />
+                                                                                    <input v-if="sub_item.date=='datetime'" type="datetime" class="form-control" />
+                                                                                    <img v-if="sub_item.date=='image'" class="image-thumb" src="/images/DefaultAsset/image_thumb.png" />
+                                                                                    <textarea v-if="sub_item.date=='textarea'" class="form-control" style="width:100;height:30px"></textarea>
+                                                                                </td>
+
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                            <div v-if="item.KieuDuLieu=='string'" class="form-group row">
+                                                                <i alt="Xóa" @@click="removeItemForm($event,item,RowIndex,ColumnIndex,itemIndex)" class="fa fa-fw fa-minus-circle delete-item"></i>
+                                                                <label for="{{item.TenTruong}}" class="col-sm-3 col-form-label">{{item.Label}}</label>
+                                                                <div class="col-sm-9">
+                                                                    <input for="{{item.TenTruong}}" class="form-control" />
+                                                                </div>
+                                                            </div>
+                                                            <div v-if="item.KieuDuLieu=='bolean'" class="form-group row">
+                                                                <i alt="Xóa" @@click="removeItemForm($event,item,RowIndex,ColumnIndex,itemIndex)" class="fa fa-fw fa-minus-circle delete-item"></i>
+                                                                <label for="{{item.TenTruong}}" class="col-sm-3 col-form-label">{{item.Label}}</label>
+                                                                <div class="col-sm-9">
+                                                                    <input for="{{item.TenTruong}}" type="checkbox" class="form-control" />
+                                                                </div>
+                                                            </div>
+                                                            <div v-if="item.KieuDuLieu=='date'" class="form-group row">
+                                                                <i alt="Xóa" @@click="removeItemForm($event,item,RowIndex,ColumnIndex,itemIndex)" class="fa fa-fw fa-minus-circle delete-item"></i>
+                                                                <label for="{{item.TenTruong}}" class="col-sm-3 col-form-label">{{item.Label}}</label>
+                                                                <div class="col-sm-9">
+                                                                    <input for="{{item.TenTruong}}" type="date" class="form-control" />
+                                                                </div>
+                                                            </div>
+                                                            <div v-if="item.KieuDuLieu=='datetime'" class="form-group row">
+                                                                <i alt="Xóa" @@click="removeItemForm($event,item,RowIndex,ColumnIndex,itemIndex)" class="fa fa-fw fa-minus-circle delete-item"></i>
+                                                                <label for="{{item.TenTruong}}" class="col-sm-3 col-form-label">{{item.Label}}</label>
+                                                                <div class="col-sm-9">
+                                                                    <input for="{{item.TenTruong}}" type="datetime" class="form-control" />
+                                                                </div>
+                                                            </div>
+                                                            <div v-if="item.KieuDuLieu=='image'" class="form-group row">
+                                                                <i alt="Xóa" @@click="removeItemForm($event,item,RowIndex,ColumnIndex,itemIndex)" class="fa fa-fw fa-minus-circle delete-item"></i>
+                                                                <label for="{{item.TenTruong}}" class="col-sm-12 col-form-label">{{item.Label}}</label>
+                                                                <div class="col-sm-12">
+                                                                    <img class="image-thumb" src="/images/DefaultAsset/image_thumb.png" />
+                                                                </div>
+                                                            </div>
+                                                            <div v-if="item.KieuDuLieu=='textarea'" class="form-group row">
+                                                                <i alt="Xóa" @@click="removeItemForm($event,item,RowIndex,ColumnIndex,itemIndex)" class="fa fa-fw fa-minus-circle delete-item"></i>
+                                                                <label for="{{item.TenTruong}}" class="col-sm-3 col-form-label">{{item.Label}}</label>
+                                                                <div class="col-sm-9">
+                                                                    <textarea for="{{item.TenTruong}}" class="form-control" style="width:100;height:30px"></textarea>
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="list-item" @@drop="onDrop($event, -1,-1)"
+                                                 @@dragover.prevent
+                                                 @@dragenter.prevent v-sortable="{animation: 250, onUpdate: work}">
+                                                <div v-for="(item,index) in listFieldsOfPending" draggable
+                                                     @@dragstart="startDrag($event, item,-1,-1,-1)" class="btn btn-block bg-gradient-success btn-flat item-html">
+                                                    {{item.Label}}
+                                                </div>
+                                            </div>
+                                            <button type="button" class="btn btn-block bg-gradient-success btn-flat item-html">H3</button>
+                                            <button type="button" class="btn btn-block bg-gradient-success btn-flat item-html">Line</button>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade build-form" id="divReport" role="tabpanel" aria-labelledby="divReport">
+                                    <report-template :items="items"></report-template>
+                                </div>
+
+                            </div>
+                        </div>
+
+
+                    </div>
+
+
+
+                    <div class="form-group">
+                        <label asp-for="Description" class="control-label"></label>
+                        <input asp-for="Description" class="form-control" />
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <input type="button" id="btnSave" value="Lưu" onclick="Save()" class="btn btn-info">
+                        <button type="button" id="btnClose" class="btn btn-danger" data-dismiss="modal">Đóng</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
+
+
+    </div>
+</div>
+
+<script src="/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+
+<script type="text/javascript">
+    Vue.component('report-template', {
+        mounted() {
+            this.init();
+        },
+        props: ['items'],
+        data: function () {
+                return {
+                    Id: @Html.Raw(@Model.Id),
+                    Label: "@Html.Raw(@Model.Label)",
+                    Name: "@Html.Raw(@Model.Name)",
+                    CreateObjectId: "@Html.Raw(@Model.CreateObjectId)",
+                    ListTables: @Html.Raw(ViewBag.JsonTablesName),
+                    ListViewTemplate: @Html.Raw(ViewBag.ListViewTemplate),
+                    Tong: 0,
+                    PhanTramThueXuat: 10,
+                    TongTien: 0,
+                    items: [],
+                    itemsNeedDelete: [],
+                    subItemsNeedDelete: [],
+                    ListKieuDuLieu: ["string", "dropdown", "Double", "Int", "Float", "bolean", "date", "datetime", "textarea", "image", "library", "ParentId", "Editor", "table"],
+                    ListKieuDuLieuSubItem: ["string", "dropdown", "Double", "Int", "Float", "bolean", "date", "datetime", "textarea", "image", "library"],
+                    listForm: [],
+                    listRows: [],
+                    totalRowOfForm: 2,
+                    ShowMoRongHuongDanThemTruong: false
+                }
+            },
+        computed: {
+            listFieldsOfPending() {
+                var listFieldsOfPending = [];
+                for (let i = 0; i < this.items.length; i++) {
+                    item = this.items[i];
+                    if (item.RowIndex === -1) {
+                        item.RamdomKey = this.makeid(6);
+                        item.IndexOfItems = i;
+                        listFieldsOfPending.push(item);
+                    }
+                }
+                return listFieldsOfPending;
+
+            }
+
+
+        },
+       methods: {
+
+            demo_func: function () {
+
+            },
+            init: function () {
+                var ListTables = this.ListTables;
+                Object.keys(ListTables).forEach(key => {
+                    for (let i = 0; i < ListTables[key].length; i++) {
+                        ListTables[key][i].KieuDuLieu = "dropdown";
+
+                    }
+                });
+                this.ListTables = ListTables;
+               
+                for (let i = 0; i < this.items.length; i++) {
+                    item = this.items[i];
+                    item.ListFieds = [];
+                    if (item.KieuDuLieu == 'dropdown') {
+                        var ListFieds = ListTables[item.TenTruong];
+                        var ListDisplayFieldOfTable = item.ListDisplayFieldOfTable;
+                        ListDisplayFieldOfTable.forEach(function (DisplayFieldOfTable, index) {
+                            ListFieds.forEach(function (Field, IndexField) {
+                                if (Field.Key == DisplayFieldOfTable.TenTruong) {
+                                    ListFieds[IndexField].Value = true;
+                                }
+                            });
+                        });
+                        item.ListFieds = ListFieds;
+                    }
+                    if (item.KieuDuLieu == 'ParentId') {
+                        this.items.forEach(function (CurrentItem, IndexSubItem) {
+                            var ListDisplayFieldOfTable = item.ListDisplayFieldOfTable;
+                            console.log("ListDisplayFieldOfTable", ListDisplayFieldOfTable);
+                            console.log("CurrentItem", CurrentItem);
+                            if (IndexSubItem != i) {
+                                var found = ListDisplayFieldOfTable.find(el => el.TenTruong === CurrentItem.TenTruong);
+                                item.ListFieds.push({ KieuDuLieu: CurrentItem.KieuDuLieu, Key: CurrentItem.TenTruong, Value: found != null });
+                            }
+                        });
+                    }
+                    
+                    var sub_items = item.sub_items;
+                    for (let i_sub_item = 0; i_sub_item < sub_items.length; i_sub_item++) {
+                        sub_item = sub_items[i_sub_item];
+                        console.log("sub_items", sub_items);
+                        console.log("item", item);
+                        item.ListFieds = [];
+                        if (sub_item.KieuDuLieu == 'dropdown') {
+                            var ListFieds = ListTables[sub_item.TenTruong];
+                            var ListDisplaySubViewFieldOfTable = sub_item.ListDisplaySubViewFieldOfTable;
+                            ListDisplaySubViewFieldOfTable.forEach(function (DisplayFieldOfTable, index) {
+                                ListFieds.forEach(function (Field, IndexField) {
+                                    if (Field.Key == DisplayFieldOfTable.TenTruong) {
+                                        ListFieds[IndexField].Value = true;
+                                    }
+                                });
+                            });
+                            sub_item.ListFieds = ListFieds;
+                        }
+                        if (sub_item.KieuDuLieu == 'ParentId') {
+                            sub_items.forEach(function (CurrentItem, IndexSubItem) {
+                                var ListDisplaySubViewFieldOfTable = sub_item.ListDisplaySubViewFieldOfTable;
+                                console.log("ListDisplaySubViewFieldOfTable", ListDisplaySubViewFieldOfTable);
+                                console.log("CurrentItem", CurrentItem);
+                                if (IndexSubItem != i_sub_item) {
+                                    var found = ListDisplaySubViewFieldOfTable.find(el => el.TenTruong === CurrentItem.TenTruong);
+                                    sub_item.ListFieds.push({  Key: CurrentItem.TenTruong, Value: found != null });
+                                }
+                            });
+                        }
+                        sub_items[i_sub_item] = sub_item;
+
+                    }
+                    item.sub_items = sub_items;
+                    this.items[i] = item;
+                }
+
+                this.listRows = this.GetListRows();
+            },
+            ThemMoi: function () {
+                this.items.push({
+                    TenTruong: "",
+                    KieuDuLieu: "string",
+                    DoLon: 50,
+                    Label: "",
+                    HienThiTrongBang: true,
+                    BatBuocNhap: true,
+                    ShowSubItem: true,
+                    RowIndex: -1,
+                    ColumnIndex: -1,
+                    RamdomKey: this.makeid(6),
+                    ListFieds: [],
+                    sub_items: [],
+                    subItemsNeedDelete: [],
+                    itemsNeedDelete: [],
+                    ListDisplayFieldOfTable: [],
+                    TenBang: "",
+                    LabelTenBang: "",
+                });
+                for (let i = 0; i < this.items.length; i++) {
+                    item = this.items[i];
+                    if (item.KieuDuLieu == 'ParentId') {
+                        item.ListFieds.push(
+                                {
+                                    FieldIndex:i,
+                                    KieuDuLieu:"string",
+                                    Key: "",
+                                    Value: false
+                                }
+                        );
+                    }
+                    this.items[i] = item;
+                }
+
+            },
+            ThemMoiSubItem: function (event, index) {
+                console.log("this.items[index]", this.items[index]);
+                this.items[index].sub_items.push({
+                    TenTruong: "",
+                    KieuDuLieu: "string",
+                    DoLon: 50,
+                    Label: "",
+                    HienThiTrongBang: true,
+                    BatBuocNhap: true,
+                    RowIndex: -1,
+                    ColumnIndex: -1,
+                    RamdomKey: this.makeid(6),
+                    ListFieds: [],
+                    ListDisplayFieldOfTable: [],
+
+                });
+                for (let i = 0; i < this.items[index].sub_items.length; i++) {
+                    item = this.items[index].sub_items[i];
+                    if (item.KieuDuLieu == 'ParentId') {
+                        item.ListFieds.push({ Key: "", Value: false });
+                    }
+                    this.items[index].sub_items[i] = item;
+                }
+
+            },
+            Xoa: function (index) {
+                if (index > -1 && this.items.length > 1) { // only splice array when item is found
+                    if(this.items[index].Id)
+                    {
+                        this.itemsNeedDelete.push(this.items[index].Id);
+                    }
+                    for (let i = 0; i < this.items.length; i++) {
+                        item = this.items[i];
+                        if (item.KieuDuLieu == 'ParentId') {
+                            var indexOfListField = item.ListFieds.findIndex(CurrentItem => CurrentItem.Key === this.items[index].TenTruong);
+                            if (indexOfListField != -1) {
+                                item.ListFieds.splice(indexOfListField, 1);
+                            }
+                        }
+                        this.items[i] = item;
+                    }
+
+                    this.items.splice(index, 1); // 2nd parameter means remove one item only
+                }
+
+            },
+
+            XoaSubItem: function (event, index, sub_index_item) {
+                console.log("XoaSubItem");
+                if (sub_index_item > -1 && this.items[index].sub_items.length > 1) { // only splice array when item is found
+                    // TODO: need fix
+                    if(this.items[index].sub_items[sub_index_item].Id){
+                        this.items[index].subItemsNeedDelete.push(this.items[index].sub_items[sub_index_item].Id);
+                    }
+                    for (let i = 0; i < this.items[index].sub_items.length; i++) {
+                        item = this.items[index].sub_items[i];
+                        if (item.KieuDuLieu == 'ParentId') {
+                            var indexOfListField = item.ListFieds.findIndex(CurrentItem => CurrentItem.Key === this.items[index].sub_items[index].TenTruong);
+                            if (indexOfListField != -1) {
+                                item.ListFieds.splice(indexOfListField, 1);
+                            }
+                        }
+                        this.items[index].sub_items[i] = item;
+                    }
+
+                    this.items[index].sub_items.splice(sub_index_item, 1); // 2nd parameter means remove one item only
+                }
+
+            },
+            ThayDoiKieuDuLieu: function ($event, index) {
+               
+                var item = this.items[index];
+                if (item.KieuDuLieu == "ParentId") {
+                    item.TenTruong = "ParentId";
+                    item.BatBuocNhap = true;
+                    item.HienThiTrongBang = true;
+                    this.items.forEach(function (CurrentItem, IndexItem) {
+                        if (IndexItem != index) {
+                            item.ListFieds.push(
+                                {
+                                    KieuDuLieu:CurrentItem.KieuDuLieu,
+                                    FieldIndex: IndexItem,
+                                    Key: CurrentItem.TenTruong,
+                                    Value: false
+                                });
+                        }
+                    });
+                }
+                if (item.KieuDuLieu != "ParentId" ) {
+                    item.TenTruong = item.TenTruong.toLowerCase() == "parentid" ? "" : item.TenTruong;
+                    item.ListFieds = []
+                }
+                
+                this.items[index] = item;
+            },
+            ThayDoiKieuDuLieuSubItem: function ($event, index, index_sub_item) {
+
+                var item = this.items[index].sub_items[index_sub_item];
+                if (item.KieuDuLieu == "ParentId") {
+                    item.TenTruong = "ParentId";
+                    item.BatBuocNhap = true;
+                    item.HienThiTrongBang = true;
+                    this.items[index].sub_items.forEach(function (CurrentItem, IndexItem) {
+                        if (IndexItem != index)
+                            item.ListFieds.push({ Key: CurrentItem.TenTruong, Value: false });
+                    });
+                }
+                if (item.KieuDuLieu != "ParentId") {
+                    item.TenTruong = item.TenTruong.toLowerCase() == "parentid" ? "" : item.TenTruong;
+                    item.ListFieds = []
+                }
+                this.items[index].sub_items[index_sub_item] = item;
+            },
+            UpdateFieldTable: function (index, ListFieds) {
+                var item = this.items[index];
+                var ListDisplayFieldOfTable = item.ListDisplayFieldOfTable;
+                ListDisplayFieldOfTable.forEach(function (DisplayFieldOfTable, index) {
+                    ListFieds.forEach(function (Field, IndexField) {
+                        if (Field.Key == DisplayFieldOfTable.TenTruong) {
+                            ListFieds[IndexField].Value = true;
+                        }
+                    });
+                });
+
+                item.ListFieds = ListFieds;
+                this.items[index] = item;
+            },
+            ChangeLabelTableName: function (event, index) {
+                this.items[index].TenBang = this.removeAccents(this.titleCase(this.items[index].LabelTenBang)).replace(/ /g, '');
+            },
+            ChangeTableName: function (event, index) {
+                let TableName = event.target.value;
+                if (this.ListTables[TableName])
+                    {
+                        console.log("this.ListTables[TableName]",this.ListTables[TableName]);
+                        this.items[index].ListFieds = this.ListTables[TableName];
+                        console.log("this.items[index]",this.ListTables[TableName]);
+                    }
+                else
+                    this.items[index].ListFieds = []
+            },
+
+            ChangeTableNameSubItem: function (event, index, index_sub_item) {
+                let TableName = event.target.value;
+                if (this.ListTables[TableName])
+                    this.items[index].sub_items[index_sub_item].ListFieds = this.ListTables[TableName];
+                else
+                    this.items[index].sub_items[index_sub_item].ListFieds = [];
+
+            },
+            startDrag: function (event, item, RowIndex, ColumnIndex, itemIndex) {
+                event.dataTransfer.dropEffect = 'move'
+                event.dataTransfer.effectAllowed = 'move'
+                event.dataTransfer.setData('RamdomKey', item.RamdomKey)
+                event.dataTransfer.setData('RowIndex', RowIndex)
+                event.dataTransfer.setData('ColumnIndex', ColumnIndex)
+                event.dataTransfer.setData('itemIndex', itemIndex)
+            },
+            removeItemForm: function (event, item, RowIndex, ColumnIndex, itemIndex) {
+                item.RowIndex = -1;
+                item.ColumnIndex = -1;
+                this.items[item.IndexOfItems] = item;
+                this.listRows[RowIndex].columns[ColumnIndex].ListItem.splice(itemIndex, 1);
+            },
+            onDrop: function (event, RowIndex, ColumnIndex) {
+                const RamdomKey = event.dataTransfer.getData('RamdomKey');
+                const itemIndex = event.dataTransfer.getData('itemIndex');
+                const RowIndexOld = event.dataTransfer.getData('RowIndex');
+                const ColumnIndexOld = event.dataTransfer.getData('ColumnIndex');
+                const item = this.items.find((item) => item.RamdomKey == RamdomKey);
+                if (RowIndexOld != -1 && ColumnIndexOld != -1 && itemIndex != -1) {
+                    this.listRows[RowIndexOld].columns[ColumnIndexOld].ListItem.splice(itemIndex, 1);
+                }
+                item.RowIndex = RowIndex;
+                item.ColumnIndex = ColumnIndex;
+                this.items[item.IndexOfItems] = item;
+                if (RowIndex == -1 && ColumnIndex == -1) {
+
+                } else {
+                    this.listRows[RowIndex].columns[ColumnIndex].ListItem.push(item);
+                }
+
+            },
+
+            work: function (event) {
+
+            },
+            makeid: function (length) {
+                let result = '';
+                const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                const charactersLength = characters.length;
+                let counter = 0;
+                while (counter < length) {
+                    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+                    counter += 1;
+                }
+                return result;
+            },
+            addColumnForm: function (event, row, rowIndex, ColumnIndex) {
+                var cloumn = {
+                    ListItem: [],
+                }
+                this.listRows[rowIndex].columns.push(cloumn);
+            },
+            GetListRows: function () {
+                let totalRowOfForm = 0;
+                if (this.items.length > 0) {
+                    totalRowOfForm = Math.max.apply(Math, this.items.map(function (item) { return item.RowIndex; }));
+                }
+                if (totalRowOfForm == -1) {
+                    totalRowOfForm = 0;
+                }
+                var listRows = [];
+
+                for (let iRow = 0; iRow <= totalRowOfForm; iRow++) {
+                    var row = {
+                        columns: [],
+                    }
+                    let listColumns = this.items.filter((item) => item.RowIndex === iRow);
+                    let totalColumnOfForm = Math.max.apply(Math, listColumns.map(function (item) { return item.ColumnIndex; }))
+
+                    for (let iColumn = 0; iColumn <= totalColumnOfForm; iColumn++) {
+                        var cloumn = {
+                            ListItem: [],
+                        }
+                        var ListItem = [];
+                        for (let i = 0; i < this.items.length; i++) {
+                            item = this.items[i];
+                            if (item.RowIndex === iRow && item.ColumnIndex === iColumn) {
+                                item.RamdomKey = this.makeid(6);
+                                item.IndexOfItems = i;
+                                cloumn.ListItem.push(item);
+                            }
+                        }
+                        row.columns.push(cloumn);
+                    }
+                    listRows.push(row);
+
+                }
+
+
+                return listRows;
+            },
+            removeColumnForm: function (event, row, rowIndex, ColumnIndex) {
+                if (this.listRows[rowIndex].columns[ColumnIndex].ListItem.length > 0) {
+                    SwalSimpleAlert("Bạn cần xóa hết các input ở bên trong trước khi xóa cột !", "warning");
+                    return;
+                }
+                if (rowIndex > -1 && ColumnIndex > -1) { // only splice array when item is found
+                    this.listRows[rowIndex].columns.splice(ColumnIndex, 1); // 2nd parameter means remove one item only
+                }
+            },
+            removeRowForm: function (event, row, rowIndex) {
+                if (row.columns.length > 0) {
+                    SwalSimpleAlert("Bạn cần xóa hết các input ở bên trong trước khi xóa dòng !", "warning");
+                    return;
+                }
+                if (rowIndex > -1) { // only splice array when item is found
+                    this.listRows.splice(rowIndex, 1); // 2nd parameter means remove one item only
+                }
+
+            },
+            addRowForm: function ($event, row, RowIndex) {
+                var row = {
+                    columns: [],
+                }
+                this.listRows.push(row);
+
+            },
+            ShowInSource: function (name) {
+                return this.removeAccents(this.titleCase(name)).replace(/ /g, '');
+            },
+            changeLabel: function (event, index) {
+                if (this.items[index].KieuDuLieu != "ParentId") {
+                    for (let i = 0; i < this.items.length; i++) {
+                        item = this.items[i];
+                        if (item.KieuDuLieu == 'ParentId') {
+                            var indexOfListField = item.ListFieds.findIndex(CurrentItem => CurrentItem.Key === this.items[index].TenTruong);
+                            if (indexOfListField != -1)
+                                item.ListFieds[indexOfListField].Key = this.removeAccents(this.titleCase(this.items[index].Label)).replace(/ /g, '');
+                        }
+                        this.items[i] = item;
+                    }
+                }
+                if (this.items[index].KieuDuLieu != "dropdown" && this.items[index].KieuDuLieu != "ParentId") {
+                    this.items[index].TenTruong = this.removeAccents(this.titleCase(this.items[index].Label)).replace(/ /g, '');
+                }
+
+
+            },
+            changeLabelSubItem: function (event, index, index_sub_item) {
+
+                console.log("this.items[index].sub_items[index_sub_item]", this.items[index].sub_items);
+                if (this.items[index].sub_items[index_sub_item].KieuDuLieu != "ParentId") {
+                    for (let i = 0; i < this.items[index].sub_items.length; i++) {
+                        let item = this.items[index].sub_items[i];
+                        console.log("this.items[index].sub_items[i]", this.items[index].sub_items[i]);
+                        console.log("item", item);
+                        var indexOfListField = item.ListFieds.findIndex(CurrentItem => CurrentItem.Key === this.items[index].sub_items[index_sub_item].TenTruong);
+                        if (indexOfListField != -1)
+                            item.ListFieds[indexOfListField].Key = this.removeAccents(this.titleCase(this.items[index].sub_items[index_sub_item].Label)).replace(/ /g, '');
+                        this.items[index].sub_items[i] = item;
+                    }
+                }
+                if (this.items[index].sub_items[index_sub_item].KieuDuLieu != "dropdown") {
+                    this.items[index].sub_items[index_sub_item].TenTruong = this.removeAccents(this.titleCase(this.items[index].sub_items[index_sub_item].Label)).replace(/ /g, '');
+                }
+
+
+            },
+            changeLabelView: function () {
+                if (this.Id == 0)
+                    this.Name = this.removeAccents(this.titleCase(this.Label)).replace(/ /g, '');
+
+            },
+            CheckInputLabel: function (event, index) {
+                var regex = new RegExp("^[-,.€~!@@#$%^&*()_+=`{}\[\]\|\\:;'<>]+$");
+                var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+                if (regex.test(key)) {
+                    event.preventDefault();
+                    return false;
+                }
+            },
+            removeAccents: function (str) {
+                var AccentsMap = [
+                    "aàảãáạăằẳẵắặâầẩẫấậ",
+                    "AÀẢÃÁẠĂẰẲẴẮẶÂẦẨẪẤẬ",
+                    "dđ", "DĐ",
+                    "eèẻẽéẹêềểễếệ",
+                    "EÈẺẼÉẸÊỀỂỄẾỆ",
+                    "iìỉĩíị",
+                    "IÌỈĨÍỊ",
+                    "oòỏõóọôồổỗốộơờởỡớợ",
+                    "OÒỎÕÓỌÔỒỔỖỐỘƠỜỞỠỚỢ",
+                    "uùủũúụưừửữứự",
+                    "UÙỦŨÚỤƯỪỬỮỨỰ",
+                    "yỳỷỹýỵ",
+                    "YỲỶỸÝỴ"
+                ];
+                for (var i = 0; i < AccentsMap.length; i++) {
+                    var re = new RegExp('[' + AccentsMap[i].substr(1) + ']', 'g');
+                    var char = AccentsMap[i][0];
+                    str = str.replace(re, char);
+                }
+                return str;
+            },
+            titleCase: function (str) {
+                var splitStr = str.toLowerCase().split(' ');
+                for (var i = 0; i < splitStr.length; i++) {
+                    // You do not need to check if i is larger than splitStr length, as your for does that for you
+                    // Assign it back to the array
+                    splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);
+                }
+                // Directly return the joined string
+                return splitStr.join(' ');
+            },
+            MoRongHuongDanThemTruong: function () {
+                this.ShowMoRongHuongDanThemTruong = !this.ShowMoRongHuongDanThemTruong;
+            },
+            MoRongSubItem: function (event, index) {
+                this.items[index].ShowSubItem = !this.items[index].ShowSubItem;
+            },
+            GetListFieldsOfPending: function () {
+                var listFieldsOfPending = [];
+                for (let i = 0; i < this.items.length; i++) {
+                    item = this.items[i];
+                    if (item.RowIndex === -1) {
+                        item.RamdomKey = this.makeid(6);
+                        item.IndexOfItems = i;
+                        listFieldsOfPending.push(item);
+                    }
+                }
+                return listFieldsOfPending;
+            },
+            watch: {
+                items: {
+                    handler: function () {
+                        console.log('something changed')
+                    },
+                    deep: true
+                }
+            },
+            MoveUp: function (event, index) {
+                var list = [...this.items];
+                tempItemOld = Object.assign({}, list[index - 1]);
+
+                list[index - 1] = Object.assign({}, list[index]);
+                list[index] = tempItemOld;
+                this.items = list;
+                 var ListTables = this.ListTables;
+                for (let i = 0; i < this.items.length; i++) {
+                    item = this.items[i];
+                    item.ListFieds = [];
+                    if (item.KieuDuLieu == 'dropdown') {
+                        var ListFieds = ListTables[item.TenTruong];
+                        var ListDisplayFieldOfTable = item.ListDisplayFieldOfTable;
+                        ListDisplayFieldOfTable.forEach(function (DisplayFieldOfTable, index) {
+                            ListFieds.forEach(function (Field, IndexField) {
+                                if (Field.Key == DisplayFieldOfTable.TenTruong) {
+                                    ListFieds[IndexField].Value = true;
+                                }
+                            });
+                        });
+                        item.ListFieds = ListFieds;
+                    }
+                    if (item.KieuDuLieu == 'ParentId') {
+                        this.items.forEach(function (CurrentItem, IndexSubItem) {
+                            var ListDisplayFieldOfTable = item.ListDisplayFieldOfTable;
+                            console.log("ListDisplayFieldOfTable", ListDisplayFieldOfTable);
+                            console.log("CurrentItem", CurrentItem);
+                            if (IndexSubItem != i) {
+                                var found = ListDisplayFieldOfTable.find(el => el.TenTruong === CurrentItem.TenTruong);
+                                item.ListFieds.push({ KieuDuLieu: CurrentItem.KieuDuLieu, Key: CurrentItem.TenTruong, Value: found != null });
+                            }
+                        });
+                    }
+                    
+                    this.items[i] = item;
+                }
+
+
+
+            },
+            MoveUpSubItem: function (event, index, index_sub_item) {
+                var list = [...this.items[index].sub_items];
+                tempItemOld = Object.assign({}, list[index_sub_item - 1]);
+                list[index_sub_item - 1] = Object.assign({}, list[index_sub_item]);
+                list[index_sub_item] = tempItemOld;
+                this.items[index].sub_items = list;
+
+
+
+            },
+            MoveDown: function (event, index) {
+                var list = [...this.items];
+                tempItemOld = Object.assign({}, list[index + 1]);
+
+                list[index + 1] = Object.assign({}, list[index]);
+                list[index] = tempItemOld;
+                this.items = list;
+                var ListTables = this.ListTables;
+                for (let i = 0; i < this.items.length; i++) {
+                    item = this.items[i];
+                    item.ListFieds = [];
+                    if (item.KieuDuLieu == 'dropdown') {
+                        var ListFieds = ListTables[item.TenTruong];
+                        var ListDisplayFieldOfTable = item.ListDisplayFieldOfTable;
+                        ListDisplayFieldOfTable.forEach(function (DisplayFieldOfTable, index) {
+                            ListFieds.forEach(function (Field, IndexField) {
+                                if (Field.Key == DisplayFieldOfTable.TenTruong) {
+                                    ListFieds[IndexField].Value = true;
+                                }
+                            });
+                        });
+                        item.ListFieds = ListFieds;
+                    }
+                    if (item.KieuDuLieu == 'ParentId') {
+                        this.items.forEach(function (CurrentItem, IndexSubItem) {
+                            var ListDisplayFieldOfTable = item.ListDisplayFieldOfTable;
+                            console.log("ListDisplayFieldOfTable", ListDisplayFieldOfTable);
+                            console.log("CurrentItem", CurrentItem);
+                            if (IndexSubItem != i) {
+                                var found = ListDisplayFieldOfTable.find(el => el.TenTruong === CurrentItem.TenTruong);
+                                item.ListFieds.push({ KieuDuLieu: CurrentItem.KieuDuLieu, Key: CurrentItem.TenTruong, Value: found != null });
+                            }
+                        });
+                    }
+                    this.items[i] = item;
+                }
+               
+
+
+            },
+            MoveDownSubItem: function (event, index, index_sub_item) {
+                var list = [...this.items[index].sub_items];
+                tempItemOld = Object.assign({}, list[index_sub_item + 1]);
+
+                list[index_sub_item + 1] = Object.assign({}, list[index_sub_item]);
+                list[index_sub_item] = tempItemOld;
+                this.items[index].sub_items = list;
+
+
+
+            },
+            ChangeViewTemplate: function () {
+
+                var template = this.ListViewTemplate.find((item) => item.Id == this.CreateObjectId);
+                console.log("template", template);
+                if (!template.IsTemplate) {
+                    SwalSimpleAlert("Nếu bạn chọn các view không phải mẫu thì sẽ không tạo được ra các trường mà bạn nhập vào, bạn sẽ phải chọn bằng tay!", "warning");
+                }
+            }
+
+        },
+        template: '#report-template'
+    })
+    Vue.directive('sortable', {
+        // When the bound element is inserted into the DOM...
+        inserted: function (el, binding) {
+            Sortable.create(el, binding.value || {})
+        }
+    })
+
+
+    app_vujs = new Vue({
+        el: '#AppCreateView',
+        mounted() {
+            this.init();
+        },
+        data: {
+            Id: @Html.Raw(@Model.Id),
+            Label: "@Html.Raw(@Model.Label)",
+            Name: "@Html.Raw(@Model.Name)",
+            CreateObjectId: "@Html.Raw(@Model.CreateObjectId)",
+            items: @Html.Raw(ViewBag.JsonObjectFields),
+            ListTables: @Html.Raw(ViewBag.JsonTablesName),
+            ListViewTemplate: @Html.Raw(ViewBag.ListViewTemplate),
+            Tong: 0,
+            PhanTramThueXuat: 10,
+            TongTien: 0,
+            itemsNeedDelete: [],
+            subItemsNeedDelete: [],
+            ListKieuDuLieu: ["string", "dropdown", "Double", "Int", "Float", "bolean", "date", "datetime", "textarea", "image", "library", "ParentId", "Editor", "table"],
+            ListKieuDuLieuSubItem: ["string", "dropdown", "Double", "Int", "Float", "bolean", "date", "datetime", "textarea", "image", "library"],
+            listForm: [],
+            listRows: [],
+            totalRowOfForm: 2,
+            ShowMoRongHuongDanThemTruong: false
+
+        },
+        computed: {
+            listFieldsOfPending() {
+                var listFieldsOfPending = [];
+                for (let i = 0; i < this.items.length; i++) {
+                    item = this.items[i];
+                    if (item.RowIndex === -1) {
+                        item.RamdomKey = this.makeid(6);
+                        item.IndexOfItems = i;
+                        listFieldsOfPending.push(item);
+                    }
+                }
+                return listFieldsOfPending;
+
+            }
+
+
+        },
+        methods: {
+
+            demo_func: function () {
+
+            },
+            init: function () {
+                var ListTables = this.ListTables;
+                Object.keys(ListTables).forEach(key => {
+                    for (let i = 0; i < ListTables[key].length; i++) {
+                        ListTables[key][i].KieuDuLieu = "dropdown";
+
+                    }
+                });
+                this.ListTables = ListTables;
+               
+                for (let i = 0; i < this.items.length; i++) {
+                    item = this.items[i];
+                    item.ListFieds = [];
+                    if (item.KieuDuLieu == 'dropdown') {
+                        var ListFieds = ListTables[item.TenTruong];
+                        var ListDisplayFieldOfTable = item.ListDisplayFieldOfTable;
+                        ListDisplayFieldOfTable.forEach(function (DisplayFieldOfTable, index) {
+                            ListFieds.forEach(function (Field, IndexField) {
+                                if (Field.Key == DisplayFieldOfTable.TenTruong) {
+                                    ListFieds[IndexField].Value = true;
+                                }
+                            });
+                        });
+                        item.ListFieds = ListFieds;
+                    }
+                    if (item.KieuDuLieu == 'ParentId') {
+                        this.items.forEach(function (CurrentItem, IndexSubItem) {
+                            var ListDisplayFieldOfTable = item.ListDisplayFieldOfTable;
+                            console.log("ListDisplayFieldOfTable", ListDisplayFieldOfTable);
+                            console.log("CurrentItem", CurrentItem);
+                            if (IndexSubItem != i) {
+                                var found = ListDisplayFieldOfTable.find(el => el.TenTruong === CurrentItem.TenTruong);
+                                item.ListFieds.push({ KieuDuLieu: CurrentItem.KieuDuLieu, Key: CurrentItem.TenTruong, Value: found != null });
+                            }
+                        });
+                    }
+                    
+                    var sub_items = item.sub_items;
+                    for (let i_sub_item = 0; i_sub_item < sub_items.length; i_sub_item++) {
+                        sub_item = sub_items[i_sub_item];
+                        console.log("sub_items", sub_items);
+                        console.log("item", item);
+                        item.ListFieds = [];
+                        if (sub_item.KieuDuLieu == 'dropdown') {
+                            var ListFieds = ListTables[sub_item.TenTruong];
+                            var ListDisplaySubViewFieldOfTable = sub_item.ListDisplaySubViewFieldOfTable;
+                            ListDisplaySubViewFieldOfTable.forEach(function (DisplayFieldOfTable, index) {
+                                ListFieds.forEach(function (Field, IndexField) {
+                                    if (Field.Key == DisplayFieldOfTable.TenTruong) {
+                                        ListFieds[IndexField].Value = true;
+                                    }
+                                });
+                            });
+                            sub_item.ListFieds = ListFieds;
+                        }
+                        if (sub_item.KieuDuLieu == 'ParentId') {
+                            sub_items.forEach(function (CurrentItem, IndexSubItem) {
+                                var ListDisplaySubViewFieldOfTable = sub_item.ListDisplaySubViewFieldOfTable;
+                                console.log("ListDisplaySubViewFieldOfTable", ListDisplaySubViewFieldOfTable);
+                                console.log("CurrentItem", CurrentItem);
+                                if (IndexSubItem != i_sub_item) {
+                                    var found = ListDisplaySubViewFieldOfTable.find(el => el.TenTruong === CurrentItem.TenTruong);
+                                    sub_item.ListFieds.push({  Key: CurrentItem.TenTruong, Value: found != null });
+                                }
+                            });
+                        }
+                        sub_items[i_sub_item] = sub_item;
+
+                    }
+                    item.sub_items = sub_items;
+                    this.items[i] = item;
+                }
+
+                this.listRows = this.GetListRows();
+            },
+            ThemMoi: function () {
+                this.items.push({
+                    TenTruong: "",
+                    KieuDuLieu: "string",
+                    DoLon: 50,
+                    Label: "",
+                    HienThiTrongBang: true,
+                    BatBuocNhap: true,
+                    ShowSubItem: true,
+                    RowIndex: -1,
+                    ColumnIndex: -1,
+                    RamdomKey: this.makeid(6),
+                    ListFieds: [],
+                    sub_items: [],
+                    subItemsNeedDelete: [],
+                    itemsNeedDelete: [],
+                    ListDisplayFieldOfTable: [],
+                    TenBang: "",
+                    LabelTenBang: "",
+                });
+                for (let i = 0; i < this.items.length; i++) {
+                    item = this.items[i];
+                    if (item.KieuDuLieu == 'ParentId') {
+                        item.ListFieds.push(
+                                {
+                                    FieldIndex:i,
+                                    KieuDuLieu:"string",
+                                    Key: "",
+                                    Value: false
+                                }
+                        );
+                    }
+                    this.items[i] = item;
+                }
+
+            },
+            ThemMoiSubItem: function (event, index) {
+                console.log("this.items[index]", this.items[index]);
+                this.items[index].sub_items.push({
+                    TenTruong: "",
+                    KieuDuLieu: "string",
+                    DoLon: 50,
+                    Label: "",
+                    HienThiTrongBang: true,
+                    BatBuocNhap: true,
+                    RowIndex: -1,
+                    ColumnIndex: -1,
+                    RamdomKey: this.makeid(6),
+                    ListFieds: [],
+                    ListDisplayFieldOfTable: [],
+
+                });
+                for (let i = 0; i < this.items[index].sub_items.length; i++) {
+                    item = this.items[index].sub_items[i];
+                    if (item.KieuDuLieu == 'ParentId') {
+                        item.ListFieds.push({ Key: "", Value: false });
+                    }
+                    this.items[index].sub_items[i] = item;
+                }
+
+            },
+            Xoa: function (index) {
+                if (index > -1 && this.items.length > 1) { // only splice array when item is found
+                    if(this.items[index].Id)
+                    {
+                        this.itemsNeedDelete.push(this.items[index].Id);
+                    }
+                    for (let i = 0; i < this.items.length; i++) {
+                        item = this.items[i];
+                        if (item.KieuDuLieu == 'ParentId') {
+                            var indexOfListField = item.ListFieds.findIndex(CurrentItem => CurrentItem.Key === this.items[index].TenTruong);
+                            if (indexOfListField != -1) {
+                                item.ListFieds.splice(indexOfListField, 1);
+                            }
+                        }
+                        this.items[i] = item;
+                    }
+
+                    this.items.splice(index, 1); // 2nd parameter means remove one item only
+                }
+
+            },
+
+            XoaSubItem: function (event, index, sub_index_item) {
+                console.log("XoaSubItem");
+                if (sub_index_item > -1 && this.items[index].sub_items.length > 1) { // only splice array when item is found
+                    // TODO: need fix
+                    if(this.items[index].sub_items[sub_index_item].Id){
+                        this.items[index].subItemsNeedDelete.push(this.items[index].sub_items[sub_index_item].Id);
+                    }
+                    for (let i = 0; i < this.items[index].sub_items.length; i++) {
+                        item = this.items[index].sub_items[i];
+                        if (item.KieuDuLieu == 'ParentId') {
+                            var indexOfListField = item.ListFieds.findIndex(CurrentItem => CurrentItem.Key === this.items[index].sub_items[index].TenTruong);
+                            if (indexOfListField != -1) {
+                                item.ListFieds.splice(indexOfListField, 1);
+                            }
+                        }
+                        this.items[index].sub_items[i] = item;
+                    }
+
+                    this.items[index].sub_items.splice(sub_index_item, 1); // 2nd parameter means remove one item only
+                }
+
+            },
+            ThayDoiKieuDuLieu: function ($event, index) {
+               
+                var item = this.items[index];
+                if (item.KieuDuLieu == "ParentId") {
+                    item.TenTruong = "ParentId";
+                    item.BatBuocNhap = true;
+                    item.HienThiTrongBang = true;
+                    this.items.forEach(function (CurrentItem, IndexItem) {
+                        if (IndexItem != index) {
+                            item.ListFieds.push(
+                                {
+                                    KieuDuLieu:CurrentItem.KieuDuLieu,
+                                    FieldIndex: IndexItem,
+                                    Key: CurrentItem.TenTruong,
+                                    Value: false
+                                });
+                        }
+                    });
+                }
+                if (item.KieuDuLieu != "ParentId" ) {
+                    item.TenTruong = item.TenTruong.toLowerCase() == "parentid" ? "" : item.TenTruong;
+                    item.ListFieds = []
+                }
+                
+                this.items[index] = item;
+            },
+            ThayDoiKieuDuLieuSubItem: function ($event, index, index_sub_item) {
+
+                var item = this.items[index].sub_items[index_sub_item];
+                if (item.KieuDuLieu == "ParentId") {
+                    item.TenTruong = "ParentId";
+                    item.BatBuocNhap = true;
+                    item.HienThiTrongBang = true;
+                    this.items[index].sub_items.forEach(function (CurrentItem, IndexItem) {
+                        if (IndexItem != index)
+                            item.ListFieds.push({ Key: CurrentItem.TenTruong, Value: false });
+                    });
+                }
+                if (item.KieuDuLieu != "ParentId") {
+                    item.TenTruong = item.TenTruong.toLowerCase() == "parentid" ? "" : item.TenTruong;
+                    item.ListFieds = []
+                }
+                this.items[index].sub_items[index_sub_item] = item;
+            },
+            UpdateFieldTable: function (index, ListFieds) {
+                var item = this.items[index];
+                var ListDisplayFieldOfTable = item.ListDisplayFieldOfTable;
+                ListDisplayFieldOfTable.forEach(function (DisplayFieldOfTable, index) {
+                    ListFieds.forEach(function (Field, IndexField) {
+                        if (Field.Key == DisplayFieldOfTable.TenTruong) {
+                            ListFieds[IndexField].Value = true;
+                        }
+                    });
+                });
+
+                item.ListFieds = ListFieds;
+                this.items[index] = item;
+            },
+            ChangeLabelTableName: function (event, index) {
+                this.items[index].TenBang = this.removeAccents(this.titleCase(this.items[index].LabelTenBang)).replace(/ /g, '');
+            },
+            ChangeTableName: function (event, index) {
+                let TableName = event.target.value;
+                if (this.ListTables[TableName])
+                    {
+                        console.log("this.ListTables[TableName]",this.ListTables[TableName]);
+                        this.items[index].ListFieds = this.ListTables[TableName];
+                        console.log("this.items[index]",this.ListTables[TableName]);
+                    }
+                else
+                    this.items[index].ListFieds = []
+            },
+
+            ChangeTableNameSubItem: function (event, index, index_sub_item) {
+                let TableName = event.target.value;
+                if (this.ListTables[TableName])
+                    this.items[index].sub_items[index_sub_item].ListFieds = this.ListTables[TableName];
+                else
+                    this.items[index].sub_items[index_sub_item].ListFieds = [];
+
+            },
+            startDrag: function (event, item, RowIndex, ColumnIndex, itemIndex) {
+                event.dataTransfer.dropEffect = 'move'
+                event.dataTransfer.effectAllowed = 'move'
+                event.dataTransfer.setData('RamdomKey', item.RamdomKey)
+                event.dataTransfer.setData('RowIndex', RowIndex)
+                event.dataTransfer.setData('ColumnIndex', ColumnIndex)
+                event.dataTransfer.setData('itemIndex', itemIndex)
+            },
+            removeItemForm: function (event, item, RowIndex, ColumnIndex, itemIndex) {
+                item.RowIndex = -1;
+                item.ColumnIndex = -1;
+                this.items[item.IndexOfItems] = item;
+                this.listRows[RowIndex].columns[ColumnIndex].ListItem.splice(itemIndex, 1);
+            },
+            onDrop: function (event, RowIndex, ColumnIndex) {
+                const RamdomKey = event.dataTransfer.getData('RamdomKey');
+                const itemIndex = event.dataTransfer.getData('itemIndex');
+                const RowIndexOld = event.dataTransfer.getData('RowIndex');
+                const ColumnIndexOld = event.dataTransfer.getData('ColumnIndex');
+                const item = this.items.find((item) => item.RamdomKey == RamdomKey);
+                if (RowIndexOld != -1 && ColumnIndexOld != -1 && itemIndex != -1) {
+                    this.listRows[RowIndexOld].columns[ColumnIndexOld].ListItem.splice(itemIndex, 1);
+                }
+                item.RowIndex = RowIndex;
+                item.ColumnIndex = ColumnIndex;
+                this.items[item.IndexOfItems] = item;
+                if (RowIndex == -1 && ColumnIndex == -1) {
+
+                } else {
+                    this.listRows[RowIndex].columns[ColumnIndex].ListItem.push(item);
+                }
+
+            },
+
+            work: function (event) {
+
+            },
+            makeid: function (length) {
+                let result = '';
+                const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                const charactersLength = characters.length;
+                let counter = 0;
+                while (counter < length) {
+                    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+                    counter += 1;
+                }
+                return result;
+            },
+            addColumnForm: function (event, row, rowIndex, ColumnIndex) {
+                var cloumn = {
+                    ListItem: [],
+                }
+                this.listRows[rowIndex].columns.push(cloumn);
+            },
+            GetListRows: function () {
+                let totalRowOfForm = 0;
+                if (this.items.length > 0) {
+                    totalRowOfForm = Math.max.apply(Math, this.items.map(function (item) { return item.RowIndex; }));
+                }
+                if (totalRowOfForm == -1) {
+                    totalRowOfForm = 0;
+                }
+                var listRows = [];
+
+                for (let iRow = 0; iRow <= totalRowOfForm; iRow++) {
+                    var row = {
+                        columns: [],
+                    }
+                    let listColumns = this.items.filter((item) => item.RowIndex === iRow);
+                    let totalColumnOfForm = Math.max.apply(Math, listColumns.map(function (item) { return item.ColumnIndex; }))
+
+                    for (let iColumn = 0; iColumn <= totalColumnOfForm; iColumn++) {
+                        var cloumn = {
+                            ListItem: [],
+                        }
+                        var ListItem = [];
+                        for (let i = 0; i < this.items.length; i++) {
+                            item = this.items[i];
+                            if (item.RowIndex === iRow && item.ColumnIndex === iColumn) {
+                                item.RamdomKey = this.makeid(6);
+                                item.IndexOfItems = i;
+                                cloumn.ListItem.push(item);
+                            }
+                        }
+                        row.columns.push(cloumn);
+                    }
+                    listRows.push(row);
+
+                }
+
+
+                return listRows;
+            },
+            removeColumnForm: function (event, row, rowIndex, ColumnIndex) {
+                if (this.listRows[rowIndex].columns[ColumnIndex].ListItem.length > 0) {
+                    SwalSimpleAlert("Bạn cần xóa hết các input ở bên trong trước khi xóa cột !", "warning");
+                    return;
+                }
+                if (rowIndex > -1 && ColumnIndex > -1) { // only splice array when item is found
+                    this.listRows[rowIndex].columns.splice(ColumnIndex, 1); // 2nd parameter means remove one item only
+                }
+            },
+            removeRowForm: function (event, row, rowIndex) {
+                if (row.columns.length > 0) {
+                    SwalSimpleAlert("Bạn cần xóa hết các input ở bên trong trước khi xóa dòng !", "warning");
+                    return;
+                }
+                if (rowIndex > -1) { // only splice array when item is found
+                    this.listRows.splice(rowIndex, 1); // 2nd parameter means remove one item only
+                }
+
+            },
+            addRowForm: function ($event, row, RowIndex) {
+                var row = {
+                    columns: [],
+                }
+                this.listRows.push(row);
+
+            },
+            ShowInSource: function (name) {
+                return this.removeAccents(this.titleCase(name)).replace(/ /g, '');
+            },
+            changeLabel: function (event, index) {
+                if (this.items[index].KieuDuLieu != "ParentId") {
+                    for (let i = 0; i < this.items.length; i++) {
+                        item = this.items[i];
+                        if (item.KieuDuLieu == 'ParentId') {
+                            var indexOfListField = item.ListFieds.findIndex(CurrentItem => CurrentItem.Key === this.items[index].TenTruong);
+                            if (indexOfListField != -1)
+                                item.ListFieds[indexOfListField].Key = this.removeAccents(this.titleCase(this.items[index].Label)).replace(/ /g, '');
+                        }
+                        this.items[i] = item;
+                    }
+                }
+                if (this.items[index].KieuDuLieu != "dropdown" && this.items[index].KieuDuLieu != "ParentId") {
+                    this.items[index].TenTruong = this.removeAccents(this.titleCase(this.items[index].Label)).replace(/ /g, '');
+                }
+
+
+            },
+            changeLabelSubItem: function (event, index, index_sub_item) {
+
+                console.log("this.items[index].sub_items[index_sub_item]", this.items[index].sub_items);
+                if (this.items[index].sub_items[index_sub_item].KieuDuLieu != "ParentId") {
+                    for (let i = 0; i < this.items[index].sub_items.length; i++) {
+                        let item = this.items[index].sub_items[i];
+                        console.log("this.items[index].sub_items[i]", this.items[index].sub_items[i]);
+                        console.log("item", item);
+                        var indexOfListField = item.ListFieds.findIndex(CurrentItem => CurrentItem.Key === this.items[index].sub_items[index_sub_item].TenTruong);
+                        if (indexOfListField != -1)
+                            item.ListFieds[indexOfListField].Key = this.removeAccents(this.titleCase(this.items[index].sub_items[index_sub_item].Label)).replace(/ /g, '');
+                        this.items[index].sub_items[i] = item;
+                    }
+                }
+                if (this.items[index].sub_items[index_sub_item].KieuDuLieu != "dropdown") {
+                    this.items[index].sub_items[index_sub_item].TenTruong = this.removeAccents(this.titleCase(this.items[index].sub_items[index_sub_item].Label)).replace(/ /g, '');
+                }
+
+
+            },
+            changeLabelView: function () {
+                if (this.Id == 0)
+                    this.Name = this.removeAccents(this.titleCase(this.Label)).replace(/ /g, '');
+
+            },
+            CheckInputLabel: function (event, index) {
+                var regex = new RegExp("^[-,.€~!@@#$%^&*()_+=`{}\[\]\|\\:;'<>]+$");
+                var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+                if (regex.test(key)) {
+                    event.preventDefault();
+                    return false;
+                }
+            },
+            removeAccents: function (str) {
+                var AccentsMap = [
+                    "aàảãáạăằẳẵắặâầẩẫấậ",
+                    "AÀẢÃÁẠĂẰẲẴẮẶÂẦẨẪẤẬ",
+                    "dđ", "DĐ",
+                    "eèẻẽéẹêềểễếệ",
+                    "EÈẺẼÉẸÊỀỂỄẾỆ",
+                    "iìỉĩíị",
+                    "IÌỈĨÍỊ",
+                    "oòỏõóọôồổỗốộơờởỡớợ",
+                    "OÒỎÕÓỌÔỒỔỖỐỘƠỜỞỠỚỢ",
+                    "uùủũúụưừửữứự",
+                    "UÙỦŨÚỤƯỪỬỮỨỰ",
+                    "yỳỷỹýỵ",
+                    "YỲỶỸÝỴ"
+                ];
+                for (var i = 0; i < AccentsMap.length; i++) {
+                    var re = new RegExp('[' + AccentsMap[i].substr(1) + ']', 'g');
+                    var char = AccentsMap[i][0];
+                    str = str.replace(re, char);
+                }
+                return str;
+            },
+            titleCase: function (str) {
+                var splitStr = str.toLowerCase().split(' ');
+                for (var i = 0; i < splitStr.length; i++) {
+                    // You do not need to check if i is larger than splitStr length, as your for does that for you
+                    // Assign it back to the array
+                    splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);
+                }
+                // Directly return the joined string
+                return splitStr.join(' ');
+            },
+            MoRongHuongDanThemTruong: function () {
+                this.ShowMoRongHuongDanThemTruong = !this.ShowMoRongHuongDanThemTruong;
+            },
+            MoRongSubItem: function (event, index) {
+                this.items[index].ShowSubItem = !this.items[index].ShowSubItem;
+            },
+            GetListFieldsOfPending: function () {
+                var listFieldsOfPending = [];
+                for (let i = 0; i < this.items.length; i++) {
+                    item = this.items[i];
+                    if (item.RowIndex === -1) {
+                        item.RamdomKey = this.makeid(6);
+                        item.IndexOfItems = i;
+                        listFieldsOfPending.push(item);
+                    }
+                }
+                return listFieldsOfPending;
+            },
+            watch: {
+                items: {
+                    handler: function () {
+                        console.log('something changed')
+                    },
+                    deep: true
+                }
+            },
+            MoveUp: function (event, index) {
+                var list = [...this.items];
+                tempItemOld = Object.assign({}, list[index - 1]);
+
+                list[index - 1] = Object.assign({}, list[index]);
+                list[index] = tempItemOld;
+                this.items = list;
+                 var ListTables = this.ListTables;
+                for (let i = 0; i < this.items.length; i++) {
+                    item = this.items[i];
+                    item.ListFieds = [];
+                    if (item.KieuDuLieu == 'dropdown') {
+                        var ListFieds = ListTables[item.TenTruong];
+                        var ListDisplayFieldOfTable = item.ListDisplayFieldOfTable;
+                        ListDisplayFieldOfTable.forEach(function (DisplayFieldOfTable, index) {
+                            ListFieds.forEach(function (Field, IndexField) {
+                                if (Field.Key == DisplayFieldOfTable.TenTruong) {
+                                    ListFieds[IndexField].Value = true;
+                                }
+                            });
+                        });
+                        item.ListFieds = ListFieds;
+                    }
+                    if (item.KieuDuLieu == 'ParentId') {
+                        this.items.forEach(function (CurrentItem, IndexSubItem) {
+                            var ListDisplayFieldOfTable = item.ListDisplayFieldOfTable;
+                            console.log("ListDisplayFieldOfTable", ListDisplayFieldOfTable);
+                            console.log("CurrentItem", CurrentItem);
+                            if (IndexSubItem != i) {
+                                var found = ListDisplayFieldOfTable.find(el => el.TenTruong === CurrentItem.TenTruong);
+                                item.ListFieds.push({ KieuDuLieu: CurrentItem.KieuDuLieu, Key: CurrentItem.TenTruong, Value: found != null });
+                            }
+                        });
+                    }
+                    
+                    this.items[i] = item;
+                }
+
+
+
+            },
+            MoveUpSubItem: function (event, index, index_sub_item) {
+                var list = [...this.items[index].sub_items];
+                tempItemOld = Object.assign({}, list[index_sub_item - 1]);
+                list[index_sub_item - 1] = Object.assign({}, list[index_sub_item]);
+                list[index_sub_item] = tempItemOld;
+                this.items[index].sub_items = list;
+
+
+
+            },
+            MoveDown: function (event, index) {
+                var list = [...this.items];
+                tempItemOld = Object.assign({}, list[index + 1]);
+
+                list[index + 1] = Object.assign({}, list[index]);
+                list[index] = tempItemOld;
+                this.items = list;
+                var ListTables = this.ListTables;
+                for (let i = 0; i < this.items.length; i++) {
+                    item = this.items[i];
+                    item.ListFieds = [];
+                    if (item.KieuDuLieu == 'dropdown') {
+                        var ListFieds = ListTables[item.TenTruong];
+                        var ListDisplayFieldOfTable = item.ListDisplayFieldOfTable;
+                        ListDisplayFieldOfTable.forEach(function (DisplayFieldOfTable, index) {
+                            ListFieds.forEach(function (Field, IndexField) {
+                                if (Field.Key == DisplayFieldOfTable.TenTruong) {
+                                    ListFieds[IndexField].Value = true;
+                                }
+                            });
+                        });
+                        item.ListFieds = ListFieds;
+                    }
+                    if (item.KieuDuLieu == 'ParentId') {
+                        this.items.forEach(function (CurrentItem, IndexSubItem) {
+                            var ListDisplayFieldOfTable = item.ListDisplayFieldOfTable;
+                            console.log("ListDisplayFieldOfTable", ListDisplayFieldOfTable);
+                            console.log("CurrentItem", CurrentItem);
+                            if (IndexSubItem != i) {
+                                var found = ListDisplayFieldOfTable.find(el => el.TenTruong === CurrentItem.TenTruong);
+                                item.ListFieds.push({ KieuDuLieu: CurrentItem.KieuDuLieu, Key: CurrentItem.TenTruong, Value: found != null });
+                            }
+                        });
+                    }
+                    this.items[i] = item;
+                }
+               
+
+
+            },
+            MoveDownSubItem: function (event, index, index_sub_item) {
+                var list = [...this.items[index].sub_items];
+                tempItemOld = Object.assign({}, list[index_sub_item + 1]);
+
+                list[index_sub_item + 1] = Object.assign({}, list[index_sub_item]);
+                list[index_sub_item] = tempItemOld;
+                this.items[index].sub_items = list;
+
+
+
+            },
+            ChangeViewTemplate: function () {
+
+                var template = this.ListViewTemplate.find((item) => item.Id == this.CreateObjectId);
+                console.log("template", template);
+                if (!template.IsTemplate) {
+                    SwalSimpleAlert("Nếu bạn chọn các view không phải mẫu thì sẽ không tạo được ra các trường mà bạn nhập vào, bạn sẽ phải chọn bằng tay!", "warning");
+                }
+            }
+
+        }
+    });
+
+
+</script>

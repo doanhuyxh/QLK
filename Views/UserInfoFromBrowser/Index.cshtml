@@ -1,0 +1,55 @@
+<div class="wrapper">
+    <div class="panel panel-hash">
+        <div class="panel-heading">
+            <div class="top_content_heading">
+                <div class="content_link">
+                    <a href="javascript:void(0)" onclick="AddEdit(0)">
+                        <div class="info-box">
+                            <span class="bg-dark icon_add"><i class="fa fa-plus-square fa-2x pointer"></i></span>
+                            <span class="span_text">Thêm</span>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="content_tittle">
+                    <h5 class="pull-right"><b>&nbsp;Thông tin từ trình duyệt người dùng</b></h5>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-body scroll panel-height">
+            <table id="tblUserInfoFromBrowser" class="ItemTranTable" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Browser Unique ID</th>
+                        <th>Lat</th>
+                        <th>Long</th>
+                        <th>Time Zone</th>
+                        <th>Browser Major</th>
+                        <th>Browser Name</th>
+                        <th>Created Date</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .panel-heading {
+        padding: 0px 0px 0px 5px;
+    }
+
+    .panel-body {
+        padding: 5px;
+    }
+
+    .h4 {
+        margin-top: 1px;
+        margin-bottom: 1px;
+    }
+</style>
+
+<script src="~/js/UserInfoFromBrowser/UserInfoFromBrowser_CRUD.js"></script>
+<script src="~/js/UserInfoFromBrowser/UserInfoFromBrowser_Datatable.js"></script>

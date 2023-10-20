@@ -1,0 +1,264 @@
+@model AMS.Models.XuatThanhPhamViewModel.XuatThanhPhamCRUDViewModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+<div id="AppXuatThanhPham" class="view-add-edit view-edit-XuatThanhPham">
+    <div class="row">
+        <div class="col-md-12">
+            <form id="frmXuatThanhPham">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="CreatedDate" />
+                <input type="hidden" asp-for="CreatedBy" />
+                <div class="d-flex py-3">
+                    <button type="button" class="btn btn-secondary text-nowrap" v-on:click="toggleExcel(1)">Thêm thủ công</button>
+                    <button type="button" class="mx-3 btn btn-success text-nowrap" v-on:click="toggleExcel(3)">Thêm bằng phiếu xuất</button>
+
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label asp-for="NgayXuat" class="control-label"></label>
+                            <input asp-for="NgayXuat" type="date" class="form-control" />
+                            <span asp-validation-for="NgayXuat" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-group" v-if="IsPhieuNhap">
+                        <label for="chonnhaplythuyet">Chọn mã phiếu nhập</label>
+                        <select class="form-control" id="chonnhaplythuyet" v-on:change="LayTuNhapKhoLyThuyet">
+                            <option value="0" disabled selected>Vui lòng chọn</option>
+                            <option v-for="ThoiGian in DanhSachLayTuPhieuXuat" v-bind:value="ThoiGian.Id">{{ThoiGian.MaPhieuXuat}}</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label asp-for="DonViTienTe" class="control-label"></label>
+                            <input asp-for="DonViTienTe" class="form-control" v-model="DonViTienTe" />
+                            <span asp-validation-for="DonViTienTe" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <p class="col-12">Thành Phẩm Xuất Kho</p>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <td>STT</td>
+                                <td>Ngày xuất</td>
+                                <td>Khách hàng</td>
+                                <td>Mã hàng</td>
+                                <td>Tên thành phẩm</td>
+                                <td>PO</td>
+                                <td>Màu sắc</td>
+                                <td>Size</td>
+                                <td>Số Lượng</td>
+                                <td>Đơn Giá</td>
+                                <td>Thành tiền</td>
+                                <td></td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(item,index) in BackupItem">
+                                <td>{{index+1}}</td>
+                                <td>
+                                    <input v-model="item.NgayXuat.split(`T`)[0]" v-if="Id == 0" type="text" class="form-control" />
+                                    <input v-model="item.NgayXuat.split(`T`)[0]" v-else-if="Id != 0" type="text" class="form-control" />
+                                    <input v-model="item.NgayXuat" v-else type="date" class="form-control" />
+
+                                </td>
+                                <td>
+                                    <input v-model="item.KhachHang" type="text" class="form-control" />
+                                </td>
+                                <td>
+                                    <input v-model="item.MaHang" type="text" class="form-control" />
+                                </td>
+                                <td>
+                                    <select v-model="item.ThanhPhamId" class="form-control" v-on:change="autoFill(index)">
+                                        <option disabled value="">Chọn thành phẩm</option>
+                                        <option v-for="nl in DanhSachThanhPham" v-bind:key="nl.Id" v-bind:value="nl.Id">{{ nl.TenThanhPham }}</option>
+                                    </select>
+                                </td>
+                                
+                                <td>
+                                    <input v-model="item.PO" type="text" class="form-control" />
+                                </td>
+                               
+                                <td>
+                                    <input v-model="item.Mau" type="text" class="form-control" />
+                                </td>
+                                <td>
+                                    <input v-model="item.Size" type="text" class="form-control" />
+                                </td>
+                                <td>
+                                    <input v-model="item.SoLuong" type="number" class="form-control" />
+                                </td>
+                                <td>
+                                    <input v-model="item.DonGia" type="number" class="form-control" />
+                                </td>
+                                <td>
+                                    <input readonly v-bind:value="formatCurrency(item.SoLuong*item.DonGia)" class="form-control" />
+                                </td>
+                                <td><button class="btn btn-warning" type="button" v-on:click="Xoa(index)">Xoá</button></td>
+                            </tr>
+
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="10">Tổng cộng: {{toatl }} </td>
+                                <td><button type="button" class="btn btn-primary" v-on:click="Them()">Thêm</button></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div class="form-group">
+                    <input type="button" id="btnSave" value="Lưu" onclick="Save()" class="btn btn-info">
+                    <button type="button" id="btnClose" class="btn btn-danger" data-dismiss="modal">Đóng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
+<script type="text/javascript">
+    AppXuatThanhPham = new Vue({
+        el: '#AppXuatThanhPham',
+        mounted() {
+            this.init();
+        },
+        data: {
+            Id: @Html.Raw(@Model.Id),
+            NgayXuat: "@Html.Raw(@Model.NgayXuat)",
+            images: new Map(),
+            previewImageThumb: "/images/DefaultAsset/image_thumb.png",
+            previewImage: null,
+            DanhSachThanhPham: [],
+            ThanhPhamXuatKho: @Html.Raw(ViewBag.DanhSachThanhPham),
+            DonViTienTe: "@Html.Raw(Model.DonViTienTe)",
+            DanhSachLayTuPhieuXuat: [],
+            IsPhieuNhap: false,
+
+        },
+        computed: {
+
+            BackupItem: function () {
+                return this.ThanhPhamXuatKho.filter(item => item.Cancelled == false)
+            },
+            toatl: function () {
+                let totals = 0;
+                this.ThanhPhamXuatKho.forEach(item => {
+                    totals += (item.SoLuong * item.DonGia)
+                })
+                return this.formatCurrency(totals);
+            }
+
+        },
+        methods: {
+            fileSelected(evt, previewImage) {
+                evt.preventDefault()
+                const reader = new FileReader();
+                reader.readAsDataURL(evt.target.files[0]);
+                reader.onload = e => {
+                    document.getElementById(previewImage).style.backgroundImage = `url('${e.target.result}')`;
+                };
+                this.images.set(previewImage, evt.target.files[0]);
+            },
+            autoFill: function (index) {
+                let tp = this.DanhSachThanhPham.filter(i => i.Id == this.ThanhPhamXuatKho[index].ThanhPhamId)[0];
+                this.ThanhPhamXuatKho[index].PO = tp.PO;
+                this.ThanhPhamXuatKho[index].Mau = tp.Mau;
+                this.ThanhPhamXuatKho[index].Size = tp.Size;
+            },
+            init: function () {
+                fetch("/QuanLyThanhPham/GetAllThanhPham")
+                    .then(res => res.json())
+                    .then(data => {
+                        this.DanhSachThanhPham = data;
+                    })
+            },
+            makeid: function (length) {
+                let result = '';
+                const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                const charactersLength = characters.length;
+                let counter = 0;
+                while (counter < length) {
+                    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+                    counter += 1;
+                }
+                return result;
+            },
+            Them: function () {
+                this.ThanhPhamXuatKho.push({
+                    Id: 0,
+                    Cancelled: false,
+                    ThanhPhamId: 0,
+                    SoLuong: 0,
+                    DonGia: 0,
+                    XuatKhoThanhPhamId: 0,
+                    PO:"",
+                    Mau:"",
+                    Size:"",
+                    KhachHang: "",
+                    MaHang: "",
+                    NgayXuat: ""
+                })
+            },
+            Xoa: function (index) {
+                if (this.ThanhPhamXuatKho.filter(item => item.Cancelled == false).length > 1) {
+                    this.ThanhPhamXuatKho[index].Cancelled = true
+                }
+                if (this.ThanhPhamXuatKho[index].Cancelled == true && this.ThanhPhamXuatKho[index].Id == 0) {
+                    this.ThanhPhamXuatKho.splice(index, 1);
+                }
+
+            },
+            formatCurrency(amount) {
+                var DecimalSeparator = Number('1.2').toLocaleString().substr(1, 1);
+                var priceWithCommas = amount.toLocaleString();
+                var arParts = String(priceWithCommas).split(DecimalSeparator);
+                var intPart = arParts[0];
+                return intPart + " " + this.DonViTienTe;
+            },
+            toggleExcel: function (newItem) {
+                if (newItem == 3) {
+                    this.IsPhieuNhap = true;
+                    let curenntThis = this;
+                    fetch("/PhieuXuatThanhPham/GetListNhapKhoLyThuyetKhiChuaNhap").then(res => res.json()).then(data => { curenntThis.DanhSachLayTuPhieuXuat = data });
+
+                }
+                else {
+                    this.IsPhieuNhap = false;
+                }
+                
+
+
+            },
+            LayTuNhapKhoLyThuyet: function (event) {
+                let idPhieu = event.target.value;
+                const CurentThis = this;
+                CurentThis.ThanhPhamXuatKho = [];
+                fetch(`/PhieuXuatThanhPham/GetListNguyenLieuNhapKhoLyThuyetKhiChuaNhapByID?nhakholythuyet=${idPhieu}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        data.forEach(item => {
+                            CurentThis.ThanhPhamXuatKho.push({
+                                Id: 0,
+                                Cancelled: false,
+                                ThanhPhamId: item.IDThanhPham,
+                                SoLuong: item.SoLuong,
+                                DonGia: item.DonGia,
+                                XuatKhoThanhPhamId: item.IDPhieu,
+                                PO: item.PO,
+                                Size: item.Size,
+                                Mau: item.Mau,
+                                KhachHang: item.KhachHang,
+                                MaHang: item.MaHang,
+                                NgayXuat: item.NgayNhap,
+                           
+                            })
+                        })
+                    })
+            },
+        }
+    });
+
+
+</script>

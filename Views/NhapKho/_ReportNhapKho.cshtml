@@ -1,0 +1,47 @@
+﻿@using System.Globalization;
+@{
+    Layout = "~/Views/Shared/_Report.cshtml";
+    var totalTienNhap = 0;
+    var curent = 0;
+    int stt = 1;
+}
+@model List<AMS.Models.NhapKhoViewModel.ReportNhapKho>
+
+<h1 class="text-dark" style="font-size:16pt">Công ty VIT GARMENT</h1>
+<h2 class="text-dark" style="font-size:16pt">Tại kho nguyên liệu</h2>
+<h2 class="text-dark" style="font-size:16pt">Địa chỉ: Hà Nội</h2>
+<h1 class="text-center" style="font-size:16pt">Báo cáo Xuất kho </h1>
+<h1 class="text-center text-blue" style="font-size:16pt">từ ngày @ViewBag.StartDate.ToString("dd/MM/yyyy") đến ngày @ViewBag.EndDate.ToString("dd/MM/yyyy")</h1>
+
+<table class="table">
+    <tr>
+        <th rowspan="2" class="text-left" style="font-size:10pt">STT</th>
+        <th rowspan="2" class="text-left" style="font-size:10pt">Mã Nguyên Liệu</th>
+        <th rowspan="2" class="text-left" style="font-size:10pt">Nguyên liệu</th>
+        <th rowspan="2" class="text-left" style="font-size:10pt">Số lượng nhập thực tế</th>
+        <th rowspan="2" class="text-left" style="font-size:10pt">Đơn giá </th>
+        <th rowspan="2" class="text-left" style="font-size:10pt">Thành tiền</th>
+    </tr>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            curent = item.DonGia * item.SoLuongNhap;
+            totalTienNhap += curent;
+            <tr>
+                <td class="text-left" style="font-size:10pt">@stt</td>
+                <td class="text-left" style="font-size:10pt">@item.MaNguyenLieu</td>
+                <td class="text-left" style="font-size:10pt">@item.TenNguyenLieu</td>
+                <td class="text-left" style="font-size:10pt">@item.SoLuongNhap</td>
+                <td class="text-left" style="font-size:10pt">@item.DonGia.ToString("C", CultureInfo.GetCultureInfo("vi-VN"))</td>
+                <td class="text-left" style="font-size:10pt">@curent.ToString("C", CultureInfo.GetCultureInfo("vi-VN"))</td>
+            </tr>
+            stt++;
+        }
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="5">Tổng cộng</td>
+            <td>@totalTienNhap.ToString("C", CultureInfo.GetCultureInfo("vi-VN"))</td>
+        </tr>
+    </tfoot>
+</table>

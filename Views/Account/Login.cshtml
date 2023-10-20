@@ -1,0 +1,64 @@
+﻿@model AMS.Models.AccountViewModels.LoginViewModel
+
+@{
+    ViewData["Title"] = "Log in";
+    var returnUrl = ViewData["ReturnUrl"];
+
+}
+<form id="frmLogin" asp-route-returnUrl="@ViewData["ReturnUrl"]">
+    <input type="hidden" asp-for="Longitude" id="Longitude" />
+    <input type="hidden" asp-for="Latitude" id="Latitude" />
+    <div>
+        <label asp-for="Email"></label>
+        <div class="input-group mb-3">
+            <input asp-for="Email" type="email" value="" class="form-control" placeholder="Email" />
+            <div class="input-group-append">
+                <div class="input-group-text">
+                    <span class="fas fa-envelope"></span>
+                </div>
+            </div>
+        </div>
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+    <div>
+        <label asp-for="Password"></label>
+        <div class="input-group mb-3">
+            <input asp-for="Password" type="password" value="" class="form-control" placeholder="Password" />
+            <div class="input-group-append">
+                <div class="input-group-text">
+                    <span class="fas fa-lock"></span>
+                </div>
+            </div>
+        </div>
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+
+    <div class="row">
+        <div class="col-6">
+            <div class="icheck-primary">
+                <input type="checkbox" asp-for="RememberMe" id="remember">
+                <label for="remember">
+                    Nhớ tôi
+                </label>
+            </div>
+        </div>
+        <div class="col-6">
+            <button type="button" id="btnUserLogin" onclick="LoginAction()" class="btn btn-primary btn-block">Đăng nhập</button>
+        </div>
+    </div>
+</form>
+
+
+<script src="~/js/LoginOperation.js"></script>
+<script>
+    var returnUrl = "@returnUrl"; // Gán giá trị returnUrl vào biến JavaScript
+</script>
+@section Scripts{
+@await Html.PartialAsync("_ValidationScriptsPartial")
+<script>
+    $(document).ready(function () {        
+        SetGeolocation();
+    });
+</script>
+}
+
